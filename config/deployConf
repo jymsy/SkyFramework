@@ -1,0 +1,76 @@
+#!/usr/bin/env php
+<?php
+array_shift($_SERVER["argv"]);
+
+call_user_func_array("initDeploy", $_SERVER["argv"]);
+
+function initDeploy($areapath,$commpath,$setDir){
+	if (!is_file($areapath) || !is_file($commpath)) {
+		echo "$areapath or $commpath is not a exist file.\n";
+		exit(1);
+	}
+	
+	if (!is_dir($setDir)) {
+		echo "$setDir is not a exist directory.\n";
+		exit(1);
+	}
+	$dom=new DOMDocument();
+ 	$dom->load($areapath);
+ 	$defArr['area']=getArea($dom);
+ 	$dom->load($commpath);
+ 	$defArr['comm']=getComm($dom);
+//  	var_dump($defArr);
+ 	
+ 	if(($fp=fopen($setDir.'/settings.php', 'w'))===FALSE){
+ 		echo 'error open settings.php';
+ 		exit(1);
+ 	}
+ 	fwrite($fp, "<?php\n");
+ 	writeSettings($fp,$defArr);
+ 	fclose($fp);
+}
+
+function writeSettings($fp,$defArr){
+	foreach ($defArr['area'] as $area){
+		$areaArr=explode('||', $area);
+		fwrite($fp,getDefineStr($areaArr[0], $areaArr[1], $areaArr[2])."\n");
+	}
+	fwrite($fp, "//@@area_config 注意：请不要删除或修改该行的内容！！！！！！\n");
+	foreach ($defArr['comm'] as $comm){
+		$commArr=explode('||', $comm);
+		fwrite($fp,getDefineStr($commArr[0], $commArr[1], $commArr[2])."\n");
+	}
+}
+
+function getDefineStr($name,$value,$comment){
+	if (is_numeric($value) || $value==='false' || $value==='true') {
+		return "defined('$name') or define('$name', $value);//$comment";
+	}
+	return "defined('$name') or define('$name', '$value');//$comment";
+}
+
+function getArea($dom){
+	$areaDom=$dom->getElementsByTagName('area');
+
+	foreach ($areaDom as $area){
+		return getDefine($area);
+	}
+}
+
+function getComm($dom){
+	$commDom=$dom->getElementsByTagName('common');
+	foreach ($commDom as $comm){
+		return getDefine($comm);
+	}
+}
+
+function getDefine($dom){
+	$defArr=array();
+	$defineDom=$dom->getElementsByTagName('define');
+	foreach ($defineDom as $define){
+		$defArr[]=$define->getAttribute('name').'||'.$define->getAttribute('value').'||'.$define->nodeValue;
+	}
+	return $defArr;
+}
+
+
