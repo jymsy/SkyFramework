@@ -41,7 +41,7 @@ class ReqInfo extends Component{
 
 			if(($fp=@fopen($this->logDir.$fileName, 'a'))===FALSE)
 			{
-				exit(1);
+				return false;
 			}
 			@flock($fp,LOCK_EX);
 			@fwrite($fp, "$msg\n");

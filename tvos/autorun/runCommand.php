@@ -25,7 +25,7 @@ class runCommand extends ConsoleCommand {
 //		$ru = new resourceSqlite();
 //		$ru->run('websiteNavigation');
 		$ru = new resourceUpdate();
-		$ru->GetLocalData('2013-08-24');
+		$ru->run_test();
 	}
 	
 	public function actionRunCopy(){

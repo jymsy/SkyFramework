@@ -159,6 +159,16 @@ class kv {
 			'source_type'=>'source_type',
 			'path_name'=>'recommend_name'
 	);
+	
+	private $videoTop_allInPython = array(
+			'areabiz_id'=>'',
+			'areabiz_type'=>'',
+			'areabiz_schema'=>'skyg_res',
+			'areabiz_table'=>'res_extra_weight',
+			'soku_id'=>'source_id',
+			'score'=>'sequence',
+			'type' =>'source_type'
+	);
 
 	public function GetArray($areabiz_type,$areabiz_table) {
 		switch ($areabiz_table) {
@@ -188,6 +198,9 @@ class kv {
 				break;
 			case 'videoTop':
 				$array = $this->videoTop;
+				break;
+			case 'videoTop_allInPython':
+				$array = $this->videoTop_allInPython;
 				break;
 			default:
 				$array = array();

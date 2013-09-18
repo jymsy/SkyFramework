@@ -21,6 +21,7 @@
 		<content value="0 * * * * cd /data/cloudservice/statistics &amp;&amp; php statPerHour.php &amp;>> hour.log" mail="shenshu@skyworth.com"></content>
 		<content value="1 */1 * * * cd /data/cloudservice/autorun &amp;&amp; php news_update.php" mail="qinlijiang@skyworth.com"></content>
 		<content value="1 18 * * * php /data/cloudservice/autorun/updateSiteShell.php" mail="qinlijiang@skyworth.com"></content>
+		<content value="* * * * * php /data/cloudservice/Framework/tvos/skyc.php reqconsum run" mail="jiangyumeng@skyworth.com"></content>
 		<!--
 		<content value="5 8 * * * cd /data/cloudservice_sky/autorun/ &amp;&amp; php run.php" mail="puzhiqing@skyworth.com"></content>
 		<content value="0 * * * * cd /data/cloudservice_sky/statistics &amp;&amp; php statPerHour.php &amp;>> hour.log" mail="puzhiqing@skyworth.com"></content>

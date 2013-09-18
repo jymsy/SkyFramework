@@ -208,6 +208,7 @@ class resourceUpdate {
 	}
 	
 	function run_test(){
+		/*
 		$server = 'lrc.skysrt.com';
 		$server = '10.200.240.211';
 		$floder = 'temp';
@@ -217,6 +218,18 @@ class resourceUpdate {
 		echo "\n resource_update GetData finish!";
 		self::Update();
 		self::Other();
+		
+		ResUpdateModel::deleteExtraWeight();
+		$server = 'lrc.skysrt.com';
+		#$server = '10.200.240.211';
+		$floder = 'temp';
+		$data = '2013-09-17';
+		$json = @file_get_contents("http://$server/$floder/$date");
+		file_put_contents("temp.txt", $json);*/
+		echo "\n resource_update GetData finish!";
+		self::Update();
+		self::Other();
+		
 	}
 	
 }

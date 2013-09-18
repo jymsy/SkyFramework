@@ -1,0 +1,75 @@
+@CHARSET "UTF-8";
+p, td, th {
+	font: 0.8em Arial, Helvetica, sans-serif;
+}
+pre { 
+white-space: pre-wrap; /* css-3 */ 
+white-space: -moz-pre-wrap; /* Mozilla, since 1999 */ 
+white-space: -pre-wrap; /* Opera 4-6 */ 
+white-space: -o-pre-wrap; /* Opera 7 */ 
+word-wrap: break-word; /* Internet Explorer 5.5+ */ 
+} 
+.datatable {
+	border: 1px solid #D6DDE6;
+	border-collapse: collapse;
+	width: 80%;
+}
+.datatable td {
+	border: 1px solid #D6DDE6;	
+	padding: 4px;
+}
+.datatable th {
+	border: 1px solid #828282;
+	background-color: #BCBCBC;
+	font-weight: bold;
+	text-align: left;
+	padding-left: 4px;
+}
+.datatable caption {
+	font: bold 0.9em Arial, Helvetica, sans-serif;
+	color: #33517A;
+	text-align: left;
+	padding-top: 3px;
+	padding-bottom: 8px;
+}
+.datatable tr.altrow {
+	background-color: #DFE7F2;
+	color: #000000;
+}
+
+.sidenav ul {
+	margin: 0 10px 0 5px;
+	padding: 0;
+	float: left;
+	list-style: none;
+	border-bottom: 1px solid #ccc;
+}
+.sidenav ul li {
+	position: relative;
+	height: 1%;
+	display: block;
+	text-decoration: none;
+	color: #777;
+	background: #fff; /* IE6 Bug */
+	padding: 5px;
+	border: 1px solid #ccc;
+	border-bottom: 0;
+	height: 1%;
+	cursor: pointer;
+}
+.sidenav ul li:hover { 
+	color: #E2144A; 
+	background: #f9f9f9; 
+}
+
+.card{
+	background-color: rgb(230,230,230);
+	border: 1px solid #101010;
+	margin: 5px;
+	float: left;
+	padding: 5px;
+	text-align:center;
+}
+.card:AFTER {
+	clear: both;
+}

@@ -1,0 +1,20 @@
+<?php
+return array(
+		'upgrade'=>array(),
+		'appstore'=>array(),
+		'resource'=>array(),
+		'base'=>array(
+			'modules'=>array(
+				'base\terminal'
+				)
+			),
+		'advert'=>array(
+				'modules'=>array(
+						'advert\boot',
+						'advert\advertising'
+				)
+		),
+		'epg'=>array(),
+		'circle'=>array(),
+		'push'=>array(),
+	);
