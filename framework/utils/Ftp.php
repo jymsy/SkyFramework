@@ -281,8 +281,8 @@ class Ftp extends \Sky\base\Component
 	/**
 	 * Upload a file to the FTP server.
 	 *
-	 * @param	string remote file
 	 * @param	string local file
+	 * @param	string remote file
 	 * @param	const  mode
 	 * @return	boolean
 	 */
@@ -290,7 +290,7 @@ class Ftp extends \Sky\base\Component
 	{
         if($this->getActive()){
         	if (!isset($remote) || $remote == null || !is_string($remote) || trim($remote) == '') {
-        		$remote = basename($remote);       	
+        		$remote = basename($local);       	
         		try {
         			$remote = $this->currentDir().'/'.$remote;
         		}catch(\Exception $e) {

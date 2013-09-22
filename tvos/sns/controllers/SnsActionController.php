@@ -612,5 +612,18 @@ class SnsActionController extends ResController {
 		}
 		return $result;
 	}
+	
+	/**
+	 * 公安校验字符串
+	 * @param unknown $str
+	 */
+	public function actionCheckStrFromPolice($str){
+		
+		if(strlen($str) > 3){
+			return 1;
+		}
+		
+		return 0;
+	}
 }
 

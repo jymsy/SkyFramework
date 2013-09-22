@@ -3,13 +3,13 @@
 define('SECDEL', 3600*24*10);
 date_default_timezone_set('Asia/Shanghai');
 array_shift($_SERVER["argv"]);
-if (count($_SERVER['argv'])!=1) {
+if (count($_SERVER['argv']) > 3) {
 	throw new InvalidArgumentException('missing argument cronPath');
 }
 
 call_user_func_array("cronRun", $_SERVER["argv"]);
 
-function cronRun($cronPath){
+function cronRun($cronPath, $eth='eth1', $errFilePath='/tmp/cron.err'){
 	$crontab=file($cronPath);
 	$now=time();
 	delOldLog($now);
@@ -55,10 +55,10 @@ function cronRun($cronPath){
 			@flock($fp,LOCK_UN);
 			@fclose($fp);
 			if ($result!='0') {
-				writeTempError("$now cmd:'$cmd' result code:$result Exec time:$exec_time\nstdout:$stdout\nstderr:$stderr\n");
+				writeTempError("$now cmd:'$cmd' result code:$result Exec time:$exec_time\nstdout:$stdout\nstderr:$stderr\n",$errFilePath);
 				foreach ($mailArr as $mail){
-					$ip=trim(getIP());
-					shell_exec('mail -s "crontab exec Error at '.$ip.'" '.$mail.'</tmp/cron.err');
+					$ip=trim(getIP($eth));
+					shell_exec('mail -s "crontab exec Error at '.$ip.'" '.$mail.'<'.$errFilePath);
 				}
 			}
 			exit();
@@ -66,12 +66,12 @@ function cronRun($cronPath){
 	}
 }
 
-function getIP(){
-	return shell_exec("/sbin/ifconfig eth1|grep \"inet addr:\"|cut -d: -f2|awk '{print $1}'");
+function getIP($eth){
+	return shell_exec("/sbin/ifconfig $eth|grep \"inet addr:\"|cut -d: -f2|awk '{print $1}'");
 }
 
-function writeTempError($str){
-	if(($fp=@fopen('/tmp/cron.err', 'w'))===FALSE){
+function writeTempError($str,$filePath){
+	if(($fp=@fopen($filePath, 'w'))===FALSE){
 		exit(1);
 	}
 	@flock($fp,LOCK_EX);

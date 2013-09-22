@@ -36,6 +36,8 @@ class ReqInfo extends Component{
 			$pos=strpos($execTime, '.');
 			
 			$route=$_REQUEST[Sky::$app->getUrlManager()->routeVar];
+			if(empty($route))
+				$route='null';
 			$msg=substr($execTime, 0,$pos).' '.$route;
 			$fileName=date('Hi');
 

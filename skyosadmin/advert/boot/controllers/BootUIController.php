@@ -119,8 +119,8 @@ class BootUIController extends PolicyController {
 		$arr['end_time'] = $_REQUEST['end_time'];
 		$arr['url'] = $_REQUEST['url'];
 		$arr['md5'] = $_REQUEST['md5'];
-		$arr['is_deleted'] = $_REQUEST['is_deleted'];
-		$arr['is_publish'] = $_REQUEST['is_publish'];	
+		$arr['is_deleted'] = 0;
+		$arr['is_publish'] = 0;	
 		$result = BootUIManageModel::insertBootUI($arr);
 		return $result;
 	}
@@ -262,7 +262,8 @@ class BootUIController extends PolicyController {
 				//返回成功上传的url说明包页地址
 				$arr = array(
 						'msg'=>'http://'.RS_HostName.'/'.$this->bootui.'/'.$obj->getName(),
-						'status'=>1
+						'status'=>1,
+						'md5'=>md5($zipPath)
 				);
 				Sky::$app->end(json_encode($arr));
 	
