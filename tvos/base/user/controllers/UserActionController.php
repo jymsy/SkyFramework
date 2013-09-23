@@ -31,15 +31,13 @@ class UserActionController extends Controller {
 	public function actionGetAdminUserId($mac){
 
 		$adminUserId = BaseDevice::queryAdmin($mac);
-
+		
 		if(empty($adminUserId) || $adminUserId == null){
 			$userName = "admin";
 			$userId = UserModel::userRegister(OPERATOR_CODE, "", $userName, IS_ADMIN);
-
 			if($userId != 0){
 				BaseDevice::addDevUserMap($mac, $userId);
 			}
-
 			return $userId;
 		}
 

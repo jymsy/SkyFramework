@@ -167,6 +167,30 @@ class SnsCollectModel extends \Sky\db\ActiveRecord{
 	}
 	
 	/**
+	 *
+	 * @param  int $userid          用户id
+	 * @param string $syscondition  策略控制条件
+	 * @return multitype:
+	 */
+	public static function queryCollectDetailByUidNoFlag($userid,$syscondition){
+		if ($syscondition!=''){
+			$v_sql=' and '.$syscondition;
+		}else{
+			$v_sql='';
+		}
+		return parent::createSQL("select scld.`collect_detail_id`,
+				                         scld.`collect_id`,
+				                         scld.`user_id`,
+				                         scld.`collect_flag`,
+				                         scld.`created_date`
+				                    from `skyg_sns`.`sns_collect_detail` AS scld
+				                   where scld.`user_id`=:v_userid".$v_sql,
+				array( "v_userid"=>(int)$userid
+				)
+		)->toList();
+	}
+	
+	/**
 	 * 
 	 * @param int $collectdetailid    分享信息表id
 	 * @param int $collectflag        分享信息状态

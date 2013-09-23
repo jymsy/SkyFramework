@@ -177,53 +177,47 @@ class EPGManageModel extends \Sky\db\ActiveRecord{
 	//////////////////epg_program///////////////////
 	public static function getNewProgramCount(){
 		$sql= sprintf("SELECT 
-						  COUNT(*) 
+						  count(*)
 						FROM
-						  `skyg_res`.`res_epg_pro_category` AS p 
-				
-						  INNER JOIN 
-						    (SELECT 
-						      `eq_ch_id` 
-						    FROM
-						      `skyg_res`.`res_epg_eq_channel` 
-						    WHERE `deleted` = 0 
-						    GROUP BY `eq_ch_id`) AS t 
-						ON t.`eq_ch_id` = p.`eq_ch_id`
-		    			where p.`start_time`>%d",time());
+						  `skyg_res`.`res_program` AS p 
+						LEFT JOIN skyg_res.`res_epg_pro_category` AS c
+						    ON p.`program_name`=c.`pg_name`  
+						JOIN skyg_res.`res_epg_category` AS rec
+						    ON c.`epg_cat_id`=rec.`epg_cat_id`
+						JOIN `skyg_res`.`res_channel` AS t
+						    ON t.`channel_id` = p.`channel_id` 
+						WHERE p.`begintime` > NOW() AND t.`channel_status` = 0
+						GROUP BY p.`program_id` ");
 		$result=parent::createSQL($sql)->toValue();
 		return $result;
 		
 	}
 	
-	public static function getNewProgram($start,$limit,$orderCondition=array('epg_cat_id'=>'DESC')){
+	public static function getNewProgram($start,$limit,$orderCondition=array('program_id'=>'DESC')){
 		$orderString=PublicModel::controlArray($orderCondition);
 		$sql=
 		sprintf("SELECT 
-				  p.`pro_cat_id`,
-				  p.`pg_name`,
-				  p.`eq_ch_id`,		
-				  c.`epg_cat_name`,		  
-				  FROM_UNIXTIME(p.`start_time`) AS `start_time`,
-				  FROM_UNIXTIME(p.`end_time`) AS `end_time`,
-				  p.`epg_cat_id`,
-				  t.`channel_name` 
+				  c.`pro_cat_id`,
+				  p.`program_name`,
+				  p.`channel_id`,
+				  p.`begintime` AS `start_time`,
+				  p.`endtime` AS `end_time`,
+				  c.`epg_cat_id`,
+				  t.`channel_name` ,
+				  rec.`epg_cat_name`
 				FROM
-				  `skyg_res`.`res_epg_pro_category` AS p 
-				LEFT JOIN skyg_res.`res_epg_category` AS c
-					ON c.`epg_cat_id`=p.`epg_cat_id` 
-				  INNER JOIN 
-				    (SELECT 
-				      `eq_ch_id`,
-				      `channel_name` 
-				    FROM
-				      `skyg_res`.`res_epg_eq_channel` 
-				    WHERE `deleted` = 0 
-				    GROUP BY `eq_ch_id`) AS t 
-				    ON t.`eq_ch_id` = p.`eq_ch_id` 
-				WHERE p.`start_time` > %d 
+				  `skyg_res`.`res_program` AS p 
+				LEFT JOIN skyg_res.`res_epg_pro_category` AS c
+				    ON p.`program_name`=c.`pg_name`  
+				JOIN skyg_res.`res_epg_category` AS rec
+				    ON c.`epg_cat_id`=rec.`epg_cat_id`
+				JOIN `skyg_res`.`res_channel` AS t
+				    ON t.`channel_id` = p.`channel_id` 
+				WHERE p.`begintime` > NOW() AND t.`channel_status` = 0
+				GROUP BY p.`program_id`  
 				ORDER BY %s 
-				LIMIT %d, %d "
-			,time(),$orderString,$start,$limit);
+				LIMIT %d, %d ",
+			$orderString,$start,$limit);
 		$result=parent::createSQL($sql)->toList();
 		return $result;
 		
@@ -233,59 +227,55 @@ class EPGManageModel extends \Sky\db\ActiveRecord{
 		$searchString=PublicModel::controlsearch($searchCondition);
 		if($searchString!='')
 			$searchString=' AND  '.$searchString;
-		$sql= sprintf("SELECT
-						  COUNT(*)
-						FROM
-						  `skyg_res`.`res_epg_pro_category` AS p
-				       LEFT JOIN skyg_res.`res_epg_category` AS c
-						ON c.`epg_cat_id`=p.`epg_cat_id`
-						  INNER JOIN
-						    (SELECT
-						      `eq_ch_id`,
-				        	  `channel_name`
-						    FROM
-						      `skyg_res`.`res_epg_eq_channel`
-						    WHERE `deleted` = 0
-						    GROUP BY `eq_ch_id`) AS t
-						ON t.`eq_ch_id` = p.`eq_ch_id`
-		    			where p.`start_time`>%d %s",time(),$searchString);
+		$sql= sprintf("SELECT 
+				  count(*)
+				FROM
+				  `skyg_res`.`res_program` AS p 
+				LEFT JOIN skyg_res.`res_epg_pro_category` AS c
+				    ON p.`program_name`=c.`pg_name`  
+				JOIN skyg_res.`res_epg_category` AS rec
+				    ON c.`epg_cat_id`=rec.`epg_cat_id`
+				JOIN `skyg_res`.`res_channel` AS t
+				    ON t.`channel_id` = p.`channel_id` 
+				WHERE p.`begintime` > NOW() 
+				AND t.`channel_status` = 0
+				%s 
+				GROUP BY p.`program_id`",$searchString);
 		$result=parent::createSQL($sql)->toValue();
 		return $result;
 	
 	}
 	
-	public static function searchNewProgram($searchCondition,$start,$limit,$orderCondition=array('epg_cat_id'=>'DESC')){
+	public static function searchNewProgram($searchCondition,$start,$limit,$orderCondition=array('program_id'=>'DESC')){
 		$searchString=PublicModel::controlsearch($searchCondition);
 		if($searchString!='')
     		$searchString=' AND  '.$searchString;
 		$orderString=PublicModel::controlArray($orderCondition);
 		$sql=
-		sprintf("SELECT
-				  p.`pro_cat_id`,
-				  p.`pg_name`,
-				  p.`eq_ch_id`,
-				  c.`epg_cat_name`,
-				  FROM_UNIXTIME(p.`start_time`) AS `start_time`,
-				  FROM_UNIXTIME(p.`end_time`) AS `end_time`,
-				  p.`epg_cat_id`,
-				  t.`channel_name`
+		sprintf("SELECT 
+				  c.`pro_cat_id`,
+				  p.`program_name`,
+				  p.`channel_id`,
+				  p.`begintime` AS `start_time`,
+				  p.`endtime` AS `end_time`,
+				  c.`epg_cat_id`,
+				  t.`channel_name` ,
+				  rec.`epg_cat_name`
 				FROM
-				  `skyg_res`.`res_epg_pro_category` AS p
-				LEFT JOIN skyg_res.`res_epg_category` AS c
-					ON c.`epg_cat_id`=p.`epg_cat_id`
-				  INNER JOIN
-				    (SELECT
-				      `eq_ch_id`,
-				      `channel_name`
-				    FROM
-				      `skyg_res`.`res_epg_eq_channel`
-				    WHERE `deleted` = 0
-				    GROUP BY `eq_ch_id`) AS t
-				    ON t.`eq_ch_id` = p.`eq_ch_id`
-				WHERE p.`start_time` > %d %s
-				ORDER BY %s
-				LIMIT %d, %d "
-				,time(),$searchString,$orderString,$start,$limit);
+				  `skyg_res`.`res_program` AS p 
+				LEFT JOIN skyg_res.`res_epg_pro_category` AS c
+				    ON p.`program_name`=c.`pg_name`  
+				JOIN skyg_res.`res_epg_category` AS rec
+				    ON c.`epg_cat_id`=rec.`epg_cat_id`
+				JOIN `skyg_res`.`res_channel` AS t
+				    ON t.`channel_id` = p.`channel_id` 
+				WHERE p.`begintime` > NOW() 
+				AND t.`channel_status` = 0
+				%s 
+				GROUP BY p.`program_id`  
+				ORDER BY %s 
+				LIMIT %d, %d ",
+			$searchString,$orderString,$start,$limit);
 		$result=parent::createSQL($sql)->toList();
 		return $result;
 	

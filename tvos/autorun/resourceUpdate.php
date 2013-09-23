@@ -12,7 +12,7 @@ class resourceUpdate {
 	
 	public function GetData($date) {
 		$server = 'lrc.skysrt.com';
-		$server = '10.200.240.211';
+// 		$server = '10.200.240.211';
 		$floder = 'allInPython';
 		$json = @file_get_contents("http://$server/$floder/$date");
 		file_put_contents("temp.txt", $json);

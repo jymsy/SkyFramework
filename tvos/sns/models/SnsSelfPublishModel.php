@@ -251,7 +251,9 @@ class SnsSelfPublishModel extends \Sky\db\ActiveRecord{
 				                       '".addslashes($vlogs)."',
 									   '".addslashes($pflag)."',
 				                       '".addslashes($ptype)."')");
-			
+		
+		
+		
 		if($par->exec()){
 			$par->getPdoInstance();
 			return $par->lastInsertID();

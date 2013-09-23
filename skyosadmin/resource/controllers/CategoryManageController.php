@@ -230,7 +230,7 @@ class CategoryManageController extends PolicyController {
 		 }elseif ($oper=='edit'){
 			return $this->edit( $this->request ); 
 		}elseif ($oper=='del'){
-			return $this->del( $this->request ); 
+			return $this->del( $this->request['id'] ); 
 		}
 	}
 	

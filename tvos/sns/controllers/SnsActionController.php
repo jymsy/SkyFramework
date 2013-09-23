@@ -15,6 +15,7 @@ use res\controllers\ResController;
 use sns\models\SnsPlaySourceModel;
 use res\models\ResourceQueryForSnsModel;
 use base\components\SkySession;
+use base\models\UnlawfulWordsModel;
 
 defined('SHOW_TYPE_DEFAULT') or define('SHOW_TYPE_DEFAULT', 1);
 defined('SHOW_TYPE_WATCHING_NOW') or define('SHOW_TYPE_WATCHING_NOW', "");
@@ -23,7 +24,8 @@ defined('SHOW_TYPE_PRIVATE') or define('SHOW_TYPE_PRIVATE', 3);
 defined('SHOW_FLGA_DEFAULT') or define('SHOW_FLGA_DEFAULT', 2);
 defined('SHOW_FLGA_PASS') or define('SHOW_FLGA_PASS', 0);
 
-defined('TIANCI_OS_ADMIN_ID') or define('TIANCI_OS_ADMIN_ID', 11003806);
+//天赐OS Id
+defined('TIANCI_OS_ADMIN_ID') or define('TIANCI_OS_ADMIN_ID', 111183188);
 defined('REPORT_SERVICE_URI') or define('REPORT_SERVICE_URI', 'http://121.199.33.20:40025/ReportService/UserActivity');
 
 class SnsActionController extends ResController {
@@ -58,7 +60,7 @@ class SnsActionController extends ResController {
 	 * @param unknown $list
 	 * @return multitype:\stdClass
 	 */
-	private function installData($list){
+	private function installData($list, $classify){
 
 		$result = array();
 		$finalResult = array();
@@ -84,7 +86,7 @@ class SnsActionController extends ResController {
 			$commentModel = SnsCommentModel::queryComment($sns->id, "");
 			$commentUsername = "天赐用户";
 			$commentStr = "影片不错赞一个！";
-
+			
 			if(!empty($commentModel)){
 				$commentDetail = SnsCommentModel::queryCommentDetailByCid($commentModel[0]['comment_id'], "");
 				if(count($commentDetail) > 0){
@@ -92,7 +94,17 @@ class SnsActionController extends ResController {
 					$commentStr = $commentDetail[0]['comment_content'];
 				}
 			}
-
+				
+			if($classify == 'tianciOS'){
+				$commentUsername = "天赐OS";
+				$commentStr = "一起来感受吧！！！";
+			}
+			
+			if($classify == 'watchingNow'){
+				$commentUsername = "同时在看";
+				$commentStr = "一起来感受吧！！！";
+			}
+			
 			$sns->firstComment = $commentStr;
 			$sns->userName = $commentUsername;
 			$result[] = $sns;
@@ -183,7 +195,7 @@ class SnsActionController extends ResController {
 			$list = SnsSelfPublishModel::listPublishByCollectUid($userId, $start, $pageSize, SHOW_TYPE_DEFAULT);
 		}
 
-		$list = self::installData($list);
+		$list = self::installData($list, $classify);
 
 		return $list;
 	}
@@ -249,7 +261,7 @@ class SnsActionController extends ResController {
 					$sqlArray[$value['v_id']] = $videoSource[0]['url'];
 				}
 			}
-				
+
 			$queryVideoIds = join(",", $queryVideoIds);
 			$flag = SnsSelfPublishModel::InsertPublishByVideoId($videoType, SHOW_TYPE_WATCHING_NOW, $queryVideoIds);
 			$result = SnsSelfPublishModel::getPublishListByVid(0, $total, $videoType, SHOW_TYPE_WATCHING_NOW, $queryVideoIds);
@@ -312,7 +324,20 @@ class SnsActionController extends ResController {
 			SnsCollectModel::updateCollect($collectId);
 		}
 
-		return SnsCollectModel::insertCollectDetail($collectId, $userId);
+		$allUserCollectModel = SnsCollectModel::queryCollectDetailByUidNoFlag($userId, "");
+
+		if(count($allUserCollectModel) > 0){
+			foreach ($allUserCollectModel as $k => $v){
+				if($collectId == $v['collect_id']){
+					//flag 改为1 视为删除
+					return SnsCollectModel::updateCollectDetail($v['collect_detail_id'], 0);
+				}
+			}
+		}else{
+			SnsCollectModel::insertCollectDetail($collectId, $userId);
+		}
+
+		return 1;
 	}
 
 	/**
@@ -379,7 +404,7 @@ class SnsActionController extends ResController {
 		}else{
 			$snsModel = SnsSelfPublishModel::getPublishCountByUrl($userSendSns->url, $userSendSns->sourceType);
 		}
-		
+
 		if(empty($snsModel)){
 			$content = "";
 			if(isset($userSendSns->content)){
@@ -390,7 +415,7 @@ class SnsActionController extends ResController {
 			if(isset($userSendSns->sourceId) && $userSendSns->sourceId != 0){
 				$sourceId = $userSendSns->sourceId;
 			}
-			
+				
 			$snsId = SnsSelfPublishModel::insertPublishByUser($sourceId, $userSendSns->sourceType,
 					$userId, $userSendSns->url, $userSendSns->title, $content,
 					"", $userSendSns->logo, SHOW_FLGA_PASS, SHOW_TYPE_DEFAULT);
@@ -405,14 +430,19 @@ class SnsActionController extends ResController {
 					$spsResult = SnsPlaySourceModel::insertPlaySource($snsId, $userSendSns->action, $userSendSns->actionType);
 				}
 			}
-			
+				
 			$userName = "";
 			if(isset($userSendSns->userName)){
 				$userName = $userSendSns->userName;
 			}
-
-			self::actionAddSnsComment($snsId, $userId, $userName, $userSendSns->firstComment);
-			return self::actionAddSnsShare($snsId, $userId, $userSendSns->firstComment);
+				
+			$commentStr = "影片不错赞一个！";
+			if(isset($userSendSns->firstComment) && strlen($userSendSns->firstComment) > 0){
+				$commentStr = $userSendSns->firstComment;
+			}
+			
+			self::actionAddSnsComment($snsId, $userId, $userName, $commentStr);
+			return self::actionAddSnsShare($snsId, $userId, $commentStr);
 		}else{
 			return -1;
 		}
@@ -585,7 +615,7 @@ class SnsActionController extends ResController {
 	 * @return number
 	 */
 	private function getTVPalyType(){
-		
+
 		$playtype = 0;
 		$sysCondition = $this->getPolicyValue('0001');
 		if($sysCondition == 'qiyi'){
@@ -612,18 +642,19 @@ class SnsActionController extends ResController {
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * 公安校验字符串
 	 * @param unknown $str
 	 */
 	public function actionCheckStrFromPolice($str){
-		
-		if(strlen($str) > 3){
+
+		$count = UnlawfulWordsModel::getUnlawfulWordsCount($str);
+		if($count > 0){
+			return 0;
+		}else{
 			return 1;
 		}
-		
-		return 0;
 	}
 }
 
