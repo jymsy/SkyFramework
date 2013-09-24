@@ -233,16 +233,15 @@ class ResUpdateModel extends \Sky\db\ActiveRecord{
 	 * @return number  修改成功返回值大于0反之等于0
 	 */
 	public static function insertvidesitebyvideourl(){
-		return parent::createSQL("INSERT INTO `skyg_res`.`res_video_site` (`vs_id`, `segment`)
-								(SELECT
+		return parent::createSQL("UPDATE `skyg_res`.`res_video_site` AS rvs,(SELECT
 								  `vs_id`,
-								  COUNT(*)
+								  COUNT(*) AS `total`
 								FROM
 								  `skyg_res`.`res_video_url`
-								GROUP BY `vs_id`)
-								ON DUPLICATE KEY
-								UPDATE
-								  `segment` = VALUES(`segment`)")->exec();
+								GROUP BY `vs_id`) AS rvu 
+				                SET rvs.`segment`=rvu.`total`
+				               WHERE rvs.`vs_id`=rvu.`vs_id`
+				                 AND rvs.`segment`<>rvu.`total`")->exec();
 	}
 	
 	/**

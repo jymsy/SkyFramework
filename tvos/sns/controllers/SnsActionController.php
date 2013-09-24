@@ -86,7 +86,7 @@ class SnsActionController extends ResController {
 			$commentModel = SnsCommentModel::queryComment($sns->id, "");
 			$commentUsername = "天赐用户";
 			$commentStr = "影片不错赞一个！";
-			
+				
 			if(!empty($commentModel)){
 				$commentDetail = SnsCommentModel::queryCommentDetailByCid($commentModel[0]['comment_id'], "");
 				if(count($commentDetail) > 0){
@@ -94,17 +94,17 @@ class SnsActionController extends ResController {
 					$commentStr = $commentDetail[0]['comment_content'];
 				}
 			}
-				
+
 			if($classify == 'tianciOS'){
 				$commentUsername = "天赐OS";
 				$commentStr = "一起来感受吧！！！";
 			}
-			
+				
 			if($classify == 'watchingNow'){
 				$commentUsername = "同时在看";
 				$commentStr = "一起来感受吧！！！";
 			}
-			
+				
 			$sns->firstComment = $commentStr;
 			$sns->userName = $commentUsername;
 			$result[] = $sns;
@@ -415,7 +415,7 @@ class SnsActionController extends ResController {
 			if(isset($userSendSns->sourceId) && $userSendSns->sourceId != 0){
 				$sourceId = $userSendSns->sourceId;
 			}
-				
+
 			$snsId = SnsSelfPublishModel::insertPublishByUser($sourceId, $userSendSns->sourceType,
 					$userId, $userSendSns->url, $userSendSns->title, $content,
 					"", $userSendSns->logo, SHOW_FLGA_PASS, SHOW_TYPE_DEFAULT);
@@ -430,17 +430,17 @@ class SnsActionController extends ResController {
 					$spsResult = SnsPlaySourceModel::insertPlaySource($snsId, $userSendSns->action, $userSendSns->actionType);
 				}
 			}
-				
+
 			$userName = "";
 			if(isset($userSendSns->userName)){
 				$userName = $userSendSns->userName;
 			}
-				
+
 			$commentStr = "影片不错赞一个！";
 			if(isset($userSendSns->firstComment) && strlen($userSendSns->firstComment) > 0){
 				$commentStr = $userSendSns->firstComment;
 			}
-			
+				
 			self::actionAddSnsComment($snsId, $userId, $userName, $commentStr);
 			return self::actionAddSnsShare($snsId, $userId, $commentStr);
 		}else{
@@ -488,16 +488,24 @@ class SnsActionController extends ResController {
 	public function actionQuerySnsUserByName($userName){
 
 		$userArray = UserModel::getUserIdByNickName($userName);
+
+		if(is_numeric($userName)){
+			$userArray = UserModel::getUserInfo($userName);
+		}
+		
 		$result = array();
 		$snsUserArray = array();
 		$userIds = array();
+	
+		if(count($userArray) > 0){
+			foreach ($userArray as $key => $value) {
+				$userIds[] = $value['userId'];
+			}
 
-		foreach ($userArray as $key => $value) {
-			$userIds[] = $value['userId'];
+			$userIds = join(',',$userIds);
+			$result = self::getUserDomainData($userArray, $userIds);
 		}
-
-		$userIds = join(',',$userIds);
-		$result = self::getUserDomainData($userArray, $userIds);
+		
 		return $result;
 	}
 

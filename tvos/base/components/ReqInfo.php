@@ -41,6 +41,7 @@ class ReqInfo extends Component{
 			$msg=substr($execTime, 0,$pos).' '.$route;
 			$fileName=date('Hi');
 
+		    @mkdir($this->logDir);
 			if(($fp=@fopen($this->logDir.$fileName, 'a'))===FALSE)
 			{
 				return false;

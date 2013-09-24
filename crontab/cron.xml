@@ -16,6 +16,9 @@
 		<content value="1 18 * * * php /data/cloudservice/autorun/updateSiteShell.php" mail="qinlijiang@skyworth.com"></content>
 		<content value="* * * * * php /data/cloudservice/Framework/tvos/skyc.php reqconsum run" mail="jiangyumeng@skyworth.com"></content>
 	</server>
+	<server name="release.sky.web">
+		<content value="* * * * * php /data/cloudservice/Framework/tvos/skyc.php reqconsum run" mail="jiangyumeng@skyworth.com"></content>
+	</server>
 	<server name="release.tvos">
 		<content value="30 7 * * * php /data/cloudservice/Framework/tvos/skyc.php run run" mail="puzhiqing@skyworth.com"></content>
 		<content value="0 * * * * cd /data/cloudservice/statistics &amp;&amp; php statPerHour.php &amp;>> hour.log" mail="shenshu@skyworth.com"></content>

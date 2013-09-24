@@ -2,7 +2,7 @@
 $config=array(
 		'basePath'=>__DIR__.DIRECTORY_SEPARATOR.'..',
 		'name'=>'demos',
-		'profProbability'=>100,
+		'profProbability'=>1,
 		'preload'=>array('log','reqlog'),
 		'homeUrl'=>'/demos/debug.php?_r=skyapp/skyapp/Catpcha',
 // 		'homeUrl'=>'/http://www.baidu.com',
