@@ -312,8 +312,52 @@ class VideoController extends PolicyController {
    	
    }
 	
-	
-	
+   /**
+    * 片源扫描结果列表
+    * */	
+	public function actionGetVideoForAuditList(){
+		//计算总数
+		$pager = new Page(VideoModel::getVideoForAuditCount());
+		//处理分页
+		$pager->prePage(); 
+		
+		$res = VideoModel::getVideoForAuditList(
+				$pager->start,
+				$pager->limit,$this->order);
+			
+		$arr = array(
+				"records"=>$pager->count, //总条数
+				"rows"=>$res,
+				"total"=>$pager->total_pages, //总页数
+				"page"=>$pager->page
+		);
+		return  $arr;
+	}
 
+	/**
+	 * 片源扫描结果处理
+	 * @param audited 操作审核
+	 * @param label 标注
+	 * */
+	public function actionUpdateVideoLabel($editArr){
+		$Arr = array(
+				'audited'=>$editArr['audited'],
+				'label'=>$editArr['label'],
+				'vs_id'=>$editArr['vs_id']
+		); 
+		return VideoModel::updateVideoLabel($Arr);
+	}
+	
+	/**
+	 * 更新解析插件
+	 * */
+	 
+	public function actionUpdatePlugIn($editArr){
+		$Arr = array(
+				'version'=>date('YmdHi'),
+				'download_url'=>$editArr['download_url']
+		); 
+		return VideoModel::updatePlugIn($Arr);
+	}
 	
 }

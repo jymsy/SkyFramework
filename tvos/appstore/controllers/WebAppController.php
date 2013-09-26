@@ -25,6 +25,7 @@ class WebAppController extends PolicyController {
 		$packageArr = array(
 				
 				//电视派安卓版（原优视）
+				 
 				"com.skyworth.skyclientcenter"=>array(
 						"sortid"=>3,
 						"xpush"=>"_hmt.push(['_trackEvent', 'nav', 'click', 'ys_a'])",
@@ -33,7 +34,7 @@ class WebAppController extends PolicyController {
 						"xclass"=>""
 						
 				),
-				
+			 
 				//玩转天赐（Android）
 				"com.skyworth.directions"=>array(
 						"sortid"=>2,

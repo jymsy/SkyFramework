@@ -25,7 +25,7 @@ class PublicModel extends \Sky\db\ActiveRecord{
 		$con='';
 		foreach($arrayCondition as $a=>$b){
 			//if($a=='product_name'||$a=='product_owner_name'||$a=='product_type_name')
-			//	$a='convert('.$a.' using gb2312) ';
+			//	$a='convert('.$a.' using gbk) ';
 			if (intval($a) == 0)$a = "`$a`";
 			if($con=='')
 				$con=$a.$split.$b;

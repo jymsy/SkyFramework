@@ -94,22 +94,13 @@ class BaseDevice extends \Sky\db\ActiveRecord{
 	 */
 	public static function addDevice($dev_mac,$chip,$model,$system_version,
 			                            $platform,$barcode,$screen_size,$resolution){
-		$result=parent::createSQL(
-				"insert into  skyg_base.base_device(dev_mac,chip,model,system_version,
-													platform,barcode,screen_size,resolution) 
-				                        values  ( :dev_mac,:chip,:model,:system_version,
-				                                   :platform,:barcode,:screen_size,:resolution)",
-				array(
-						"dev_mac"=>$dev_mac,
-						"chip"=>$chip,
-						"model"=>$model,
-						"system_version"=>$system_version,
-						"platform"=>$platform,
-						"barcode"=>$barcode,
-						"screen_size"=>$screen_size,
-						"resolution"=>$resolution
-				)
-		)->exec();		
+		$sql=sprintf("insert into  skyg_base.base_device(dev_mac,chip,model,system_version,
+													platform,barcode,screen_size,resolution,create_date) 
+				                        values  ( '%s','%s','%s','%s',
+				                                   '%s','%s','%s','%s',now())",$dev_mac,
+						$chip,$model,$system_version,$platform,
+						$barcode,$screen_size,$resolution);
+		$result=parent::createSQL($sql)->exec();		
 				
 		return $result;		 
 	}	

@@ -58,7 +58,7 @@ function cronRun($cronPath, $eth='eth1', $errFilePath='/tmp/cron.err'){
 				writeTempError("$now cmd:'$cmd' result code:$result Exec time:$exec_time\nstdout:$stdout\nstderr:$stderr\n",$errFilePath);
 				foreach ($mailArr as $mail){
 					$ip=trim(getIP($eth));
-					shell_exec('mail -s "crontab exec Error at '.$ip.'" '.$mail.'<'.$errFilePath);
+					shell_exec('export LANG=en_US.UTF-8;mail -s "crontab exec Error at '.$ip.'" '.$mail.'<'.$errFilePath);
 				}
 			}
 			exit();

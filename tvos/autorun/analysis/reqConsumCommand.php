@@ -67,9 +67,28 @@ class reqConsumCommand extends ConsoleCommand{
 		$fileName=REQ_LOG_DIR.date('Hi',$now-60);
 // 		$fileName=REQ_LOG_DIR.'1551';
 		echo 'read from log file:'.$fileName."\n";
-		if (is_file($fileName))
+		if (is_dir(REQ_LOG_DIR)) 
 		{
-			$result=shell_exec("cat $fileName|awk '{a[$2]++;b[$2]+=$1} END {for (i in a) print i,\":\"a[i]\":\"b[i]}'|sed 's/ //g'|xargs");
+			if (!is_file($fileName) && date('i')=='05') {
+				$result='norequest:0:0';
+				$this->interface='cmd_stat_no';
+				$this->sendResult($result);
+			}
+			elseif (is_file($fileName))
+			{
+				$result=shell_exec("cat $fileName|awk '{a[$2]++;b[$2]+=$1} END {for (i in a) print i,\":\"a[i]\":\"b[i]}'|sed 's/ //g'|xargs");
+				$this->sendResult($result);
+			}
+			else
+			{
+				echo "$fileName is not exist!";
+			}
+		}
+	}
+	
+	private function sendResult($result)
+	{
+		if (!empty($result)) {
 			echo $result."\n";
 			$formatRet=$this->formatRet($result);
 			if($this->sendMsg($formatRet)===false)
@@ -78,11 +97,6 @@ class reqConsumCommand extends ConsoleCommand{
 				return 1;
 			}
 		}
-		else
-		{
-			echo "$fileName is not exist!";
-		}
-
 	}
 
 	/**

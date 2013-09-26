@@ -473,7 +473,103 @@ public static function model($className=__CLASS__){
 	
 	}
 	
+	/**统计解析异常的video数量
+	 * 
+	 * @return multitype:
+	 */
+	public static function getVideoForAuditCount()
+	{
+		$sql="SELECT
+				  count(*)
+				FROM
+				  skyg_res.`res_video_site` AS rvs
+				  JOIN skyg_res.res_video AS rv
+				    ON rv.`v_id` = rvs.`v_id`
+				  JOIN skyg_res.`res_video_url` AS rvu
+				    ON rvu.`vs_id` = rvs.`vs_id`
+				WHERE rvs.`run_time` <= 0 ";
+		$result=parent::createSQL($sql)->toValue();
+		return $result;
+	}
 	
+	/**解析异常的video列表
+	 * 
+	 * @param Int $start
+	 * @param Int $limit
+	 * @param String $orderCondition
+	 * @return multitype:
+	 */
+	public static function getVideoForAuditList($start,$limit,$orderCondition=array('vs_id'=>'DESC'))
+	{
+		$orderString=PublicModel::controlArray($orderCondition);
+		$orderString=str_replace("vs_id", "rvs`.`vs_id", $orderString);
+		$orderString=str_replace("title", "rv`.`title", $orderString);
+		$sql=sprintf("SELECT 
+				  rvs.vs_id,
+				  rv.title,
+				  rvu.url,
+				  rvs.run_time,
+				  rvs.label,
+				  rvs.audited,
+				  rvs.expired,
+				  CASE
+				    WHEN rvs.audited = 0 
+				    THEN 2 
+				    WHEN rvs.audited = 1 
+				    THEN rvs.expired 
+				  END AS audit 
+				FROM
+				  skyg_res.`res_video_site` AS rvs 
+				  JOIN skyg_res.res_video AS rv 
+				    ON rv.`v_id` = rvs.`v_id` 
+				  JOIN skyg_res.`res_video_url` AS rvu 
+				    ON rvu.`vs_id` = rvs.`vs_id` 
+				WHERE rvs.`run_time` <= 0 
+				ORDER BY %s 
+				LIMIT %d, %d",$orderString,$start,$limit);
+		echo($sql);
+		$result=parent::createSQL($sql)->toList();
+		return $result;
+	}
 	
+	/**更新标注及审核值
+	 * 
+	 * @param unknown_type $vs_id
+	 * @param unknown_type $label
+	 * @param unknown_type $audited  2-未审核，1-下架，0-上架
+	 * @return number
+	 */
+	public static function updateVideoLabel($vs_id,$label,$audited)
+	{
+		if($audited==2)
+			$update_sql="`audited` = 0";
+		else
+			$update_sql=sprintf("`audited` =1,`expired` = %d",$audited);
+		$sql=sprintf("UPDATE
+					  skyg_res.`res_video_site`
+					SET
+					  `label` = '%s',%s
+					WHERE vs_id = %d ",$label,$update_sql,$vs_id);
+		$result=parent::createSQL($sql)->exec();
+		return $result;
+	}
 	
+	/**更新插件
+	 *
+	* @param unknown_type $version
+	* @param unknown_type $download_url
+	* @return unknown
+	*/
+	public static function updatePlugIn($version,$download_url)
+	{
+		$sql=sprintf("UPDATE
+					  `statistics`.`dbfile`
+					SET
+					  `version` = '%s',
+					  `download_url` = '%s'
+					WHERE res_type = 'plugin_video' ",$version,$download_url);
+		$result=parent::createSQL($sql)->exec();
+		return $result;
+	}
+		
 }
