@@ -31,7 +31,9 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 			LEFT JOIN `skyg_res`.`res_advert_pos` AS `rap` 
 			ON `ra`.`ad_id`=`rap`.`ad_id`
 			WHERE 1=1 ";
-		if ($flag)$sql .= " and `ra`.`flag`='".addslashes($flag)."' ";
+		if (isset($flag) && $flag!==""){
+			$sql .= " and `ra`.`flag`='".addslashes($flag)."' ";
+		}
 		$sqlconnect = "";
 		if ($position) {
 			$sqlconnect .= " and `rap`.`position`=%d ";
@@ -40,7 +42,7 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 		if ($name) {
 			$sqlconnect .= " and `ra`.`name` like '".addslashes("%".$name."%")."' ";
 		}
-		if ($type) {
+		if (isset($type) && $type!=="") {
 			$sqlconnect .= " and `ra`.`type`='".addslashes($type)."' ";
 		}
 		if ($scene) {
@@ -65,7 +67,7 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 			LEFT JOIN `skyg_res`.`res_advert_pos` AS `rap`
 			ON `ra`.`ad_id`=`rap`.`ad_id`
 			WHERE 1=1 ";
-		if ($flag)$sql .= " and `ra`.`flag`='".addslashes($flag)."' ";
+		if (isset($flag) && $flag!=="")$sql .= " and `ra`.`flag`='".addslashes($flag)."' ";
 		$sqlconnect = "";
 		if ($position) {
 			$sqlconnect .= " and `rap`.`position`=%d ";
@@ -74,7 +76,7 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 		if ($name) {
 			$sqlconnect .= " and `ra`.`name` like '".addslashes("%".$name."%")."' ";
 		}
-		if ($type) {
+		if (isset($type) && $type!=="") {
 			$sqlconnect .= " and `ra`.`type`='".addslashes($type)."' ";
 		}
 		if ($scene) {
@@ -133,9 +135,9 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 	 * @return unknown
 	 */
 	public static function alterAds($adsId,$name,$type,$url,$flag){
-		if ($flag == 'stop'){
+		if ($flag == '0'){
 			$result = self::cleanAdsPositionAdId($adsId);
-			if (!$result)return $result;
+		
 		}
 		$sqlconnect = "";
 		if ($name){
@@ -143,9 +145,9 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 			else $sqlconnect = "`name`='%s'";
 			$sqlconnect = sprintf($sqlconnect,addslashes($name));
 		}
-		if ($type){
-			if ($sqlconnect)$sqlconnect .= ",`type`='%s'";
-			else $sqlconnect = "`type`='%s'";
+		if (isset($type) && $type!==""){
+			if ($sqlconnect)$sqlconnect .= ",`type`='%d'";
+			else $sqlconnect = "`type`='%d'";
 			$sqlconnect = sprintf($sqlconnect,addslashes($type));
 		}
 		if ($url){
@@ -153,9 +155,10 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 			else $sqlconnect = "`url`='%s'";
 			$sqlconnect = sprintf($sqlconnect,addslashes($url));
 		}
-		if ($flag){
-			if ($sqlconnect)$sqlconnect .= ",`flag`='%s'";
-			else $sqlconnect = "`flag`='%s'";
+		if (isset($flag) && $flag!==""){
+			
+			if ($sqlconnect)$sqlconnect .= ",`flag`='%d'";
+			else $sqlconnect = "`flag`='%d'";
 			$sqlconnect = sprintf($sqlconnect,addslashes($flag));
 		}
 		$sql = "update `skyg_res`.`res_advert` set $sqlconnect where `ad_id`=%d";
@@ -171,8 +174,8 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 	 */
 	public static function addAds($name,$type,$url,$flag){
 		if ($name && $type && $url){
-			if (!$flag)$flag = "using";
-			$sql = "insert into `skyg_res`.`res_advert` (`name`,`type`,`url`,`flag`) values ('%s','%s','%s','%s') ";
+			if (isset($flag) && $flag!=="")$flag = addslashes($flag);
+			$sql = "insert into `skyg_res`.`res_advert` (`name`,`type`,`url`,`flag`) values ('%s','%d','%s','%d') ";
 			$sql = sprintf($sql,addslashes($name),addslashes($type),addslashes($url),addslashes($flag));
 			return parent::createSQL($sql)->exec();
 		}
@@ -310,6 +313,8 @@ class AdvertModel extends \Sky\db\ActiveRecord{
 		$sql = "update `skyg_res`.`res_advert_pos` set `ad_id`=null where `ad_id`=%d";
 		return parent::createSQL(sprintf($sql,$ad_id))->exec();
 	}
+	
+	
 	
 	/**
 	 * 

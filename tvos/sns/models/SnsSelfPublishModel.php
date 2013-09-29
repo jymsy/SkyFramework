@@ -410,11 +410,11 @@ class SnsSelfPublishModel extends \Sky\db\ActiveRecord{
 				                     left join `skyg_sns`.`sns_praise` AS sp 
 				                            on ssp.`publish_id`=sp.`publish_id`
 				                     left join `skyg_sns`.`sns_play_source` as sps
-				                            on sps.`publish_id`=ssp.`publish_id`
-				                           and (ssp.`source_id` > 0 or sps.`play_type`=:playtype or sps.`play_type`=0)
+				                            on sps.`publish_id`=ssp.`publish_id`				                           
 					                where ss.`publish_id`=ssp.`publish_id`
 				                      and ssp.`publish_type`=:ptype
 				                      and ssp.`publish_flag`=0 
+				                      and (ssp.`source_id` > 0 or sps.`play_type`=:playtype or sps.`play_type`=0)
 				                    order by ss.`share_count` desc
 				                     limit :star,:pagesize",
 				                 array( "star"=>(int)$star,
@@ -703,9 +703,9 @@ class SnsSelfPublishModel extends \Sky\db\ActiveRecord{
 				                            on ssp.`publish_id`=sp.`publish_id`
 				                     left join `skyg_sns`.`sns_play_source` as sps
 				                            on sps.`publish_id`=ssp.`publish_id`
-				                           and (ssp.`source_id` > 0 or sps.`play_type`=:playtype or sps.`play_type`=0)
 				                     where ssp.`publish_type`=:ptype
 				                       and ssp.`publish_flag`=0
+				                       and (ssp.`source_id` > 0 or sps.`play_type`=:playtype or sps.`play_type`=0)
 				                    order by ss.`last_update_date` desc
 				                     limit :star,:pagesize",
 				array(  "ptype"=>(int)$ptype,  

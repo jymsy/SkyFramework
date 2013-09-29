@@ -84,11 +84,12 @@ class kv {
 			'date'=>'date',
 	);
 
-	private $kowoTop = array(
+	private $kuwoTop = array(
 			'areabiz_id'=>'',
 			'areabiz_type'=>'',
 			'areabiz_schema'=>'skyg_res',
 			'areabiz_table'=>'res_music_top',
+			'id'=>'music_top_id',
 			'resmark'=>'resmark',
 			'title'=>'title',
 			'singer'=>'singer',
@@ -185,7 +186,7 @@ class kv {
 				$array = $this->sokuComment;
 				break;
 			case 'kuwoTop':
-				$array = $this->kowoTop;
+				$array = $this->kuwoTop;
 				break;
 			case 'playbill':
 				$array = $this->poster;

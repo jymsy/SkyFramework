@@ -8,6 +8,7 @@ class resourceUpdate {
 	
 	public function before() {
 		ResUpdateModel::updateVideoIsOld();
+		ResUpdateModel::deleteExtraWeight();
 	}
 	
 	public function GetData($date) {
@@ -133,7 +134,7 @@ class resourceUpdate {
 	
 	function Other() {
 		ResUpdateModel::insertvidesitebyvideourl();
-// 		ResUpdateModel::modifymusictop();
+ 		ResUpdateModel::modifymusictop();
 // 		ResUpdateModel::modifyplaybill();
 		echo "\n resource_update Other finish!";
 	}

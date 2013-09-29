@@ -527,10 +527,12 @@ public static function model($className=__CLASS__){
 				WHERE rvs.`run_time` <= 0 
 				ORDER BY %s 
 				LIMIT %d, %d",$orderString,$start,$limit);
-		echo($sql);
+		
 		$result=parent::createSQL($sql)->toList();
 		return $result;
 	}
+	
+	
 	
 	/**更新标注及审核值
 	 * 
@@ -569,6 +571,45 @@ public static function model($className=__CLASS__){
 					  `download_url` = '%s'
 					WHERE res_type = 'plugin_video' ",$version,$download_url);
 		$result=parent::createSQL($sql)->exec();
+		return $result;
+	}
+	
+	
+	/**更新runtime,width,height
+	 * 
+	 * @param unknown_type $vs_id
+	 * @param unknown_type $run_time
+	 * @param unknown_type $width
+	 * @param unknown_type $height
+	 */
+	public static function updateVideoRunTime($vs_id,$run_time,$width,$height)
+	{
+		$sql=sprintf("UPDATE
+					  skyg_res.`res_video_site`
+					SET
+					  `run_time` = %d,
+					  `width` = %d,
+				      `height`=%d
+					WHERE  vs_id = %d ",$run_time,$width,$height,$vs_id);
+		$result=parent::createSQL($sql)->exec();
+		return $result;
+	}
+	
+	/**获取$arr_id的url
+	 * 
+	 * @param array $arr_id
+	 * @return multitype:
+	 */
+	public static function getURLById($arr_id)
+	{
+		$str_id=implode(",",$arr_id);
+		$sql=sprintf(" SELECT 
+						 `vs_id`,
+						  `url`				           
+						FROM
+						  skyg_res.res_video_url 
+						WHERE vs_id IN (%s)",$str_id);
+		$result=parent::createSQL($sql)->toList();
 		return $result;
 	}
 		

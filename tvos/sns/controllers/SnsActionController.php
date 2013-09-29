@@ -333,11 +333,9 @@ class SnsActionController extends ResController {
 					return SnsCollectModel::updateCollectDetail($v['collect_detail_id'], 0);
 				}
 			}
-		}else{
-			SnsCollectModel::insertCollectDetail($collectId, $userId);
 		}
-
-		return 1;
+		
+		return SnsCollectModel::insertCollectDetail($collectId, $userId);
 	}
 
 	/**

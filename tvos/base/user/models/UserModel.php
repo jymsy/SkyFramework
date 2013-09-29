@@ -238,7 +238,7 @@ class UserModel extends \Sky\db\ActiveRecord{
 				  `user_icon` AS userIcon 
 				FROM
 				  `skyg_base`.`base_user` 
-				WHERE `user_nickname` ='%s' %s",$userNickName,$con);
+				WHERE `user_nickname` like '%%s%' %s",$userNickName,$con);
 		$result=parent::createSQL($sql)->toList();
 		return $result;
 	}

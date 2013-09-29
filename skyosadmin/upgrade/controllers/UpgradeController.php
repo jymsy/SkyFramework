@@ -332,7 +332,10 @@ class UpgradeController extends PolicyController {
 	 * 大包编辑
 	 */
 	public function edit($editArr){
-	 
+	  if(isset($editArr['cancelEdit'])&&
+	  isset($editArr['cancelEdit'])=='true'){
+	     return 0;
+	  }
 		
 		$Arr = array(
     					'mac_start'=>$editArr['mac_start'],

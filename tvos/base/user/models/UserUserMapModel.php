@@ -27,17 +27,15 @@ class UserUserMapModel extends \Sky\db\ActiveRecord{
 	 * @return Int 1-添加成功，0-添加失败
 	 */
 	public static function addUserUserMap($main_user_id,$sub_user_id,$group_type){
-		$result=parent::createSQL(
-				"insert into  skyg_base.base_user_user_map(main_user_id,sub_user_id,group_type)  values  ( :main_user_id,:sub_user_id,:group_type )",
-				array(
-						"main_user_id"=>(int)$main_user_id,
-						"sub_user_id"=>(int)$sub_user_id,
-						"group_type"=>(int)$group_type
-				)
-		)->exec();
+	
+		$sql=sprintf("insert into  skyg_base.base_user_user_map(main_user_id,sub_user_id,group_type,create_date)
+				values  ( %d,%d,%d ,now())",$main_user_id,$sub_user_id,$group_type);
+		$result=parent::createSQL($sql)->exec();
 		return $result;
-		 
+			
+		
 	}
+	
 	
 	/**
 	 * 删除user_user_map关系数据

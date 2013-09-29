@@ -41,6 +41,7 @@ class BaseDevice extends \Sky\db\ActiveRecord{
 				)
 		)->toValue();		
 		return $result;
+		
 	}
 	
 	

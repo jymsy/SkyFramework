@@ -38,4 +38,13 @@ class UserIdentity extends Component implements IUserIdentity{
 		throw new \Exception(get_class($this).'::authenticate() must be implemented.');
 	}
 	
+	public function getId()
+	{
+		
+	}
+	
+	public function getName()
+	{
+		
+	}
 }

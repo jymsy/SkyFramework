@@ -14,6 +14,7 @@ function cronRun($cronPath, $eth='eth1', $errFilePath='/tmp/cron.err'){
 	$now=time();
 	delOldLog($now);
 	$mailArr=array();
+	$newErrFile=$errFilePath.'.new';
 	foreach ( $crontab as $cron ) {
 		$cron=ltrim($cron);
 		if ($cron[0]==='#') {
@@ -58,7 +59,8 @@ function cronRun($cronPath, $eth='eth1', $errFilePath='/tmp/cron.err'){
 				writeTempError("$now cmd:'$cmd' result code:$result Exec time:$exec_time\nstdout:$stdout\nstderr:$stderr\n",$errFilePath);
 				foreach ($mailArr as $mail){
 					$ip=trim(getIP($eth));
-					shell_exec('export LANG=en_US.UTF-8;mail -s "crontab exec Error at '.$ip.'" '.$mail.'<'.$errFilePath);
+					shell_exec('cat '.$errFilePath.' | sed \'s/\r//\' >'.$newErrFile);
+					shell_exec('export LANG=en_US.UTF-8;mail -s "crontab exec Error at '.$ip.'" '.$mail.'<'.$newErrFile);
 				}
 			}
 			exit();

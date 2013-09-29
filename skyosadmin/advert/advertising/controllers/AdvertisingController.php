@@ -48,9 +48,19 @@ class AdvertisingController extends PolicyController {
 	*/
 	private $rs_root = "";
 	
-	
-	
+	/*
+	 * 用于保存所有url的参数
+	 */
 	private $request = array();
+	/*
+	 * 用于保存排序字段
+	 */
+	private $order = array();
+	/*
+	 * 用于保存搜索的字段
+	 */
+	private $s = array();
+	
 	 
 	public function beforeAction($action){
 		$this->request = parent::getActionParams(); 
@@ -59,8 +69,20 @@ class AdvertisingController extends PolicyController {
 		$this->websiteDir = UPLOADROOT.$this->websiteDir;  // 结果 = /rs/website
 		$this->rs_root = RS_ROOT; // 结果 = /data/www
 	
-		$sidx = $request['sidx']; //字段名
-		!isset($this->request['sidx']) ? $this->request['sidx'] = 1:$this->request['sidx'] = $this->request['sidx'];
+			//搜索原始参数处理，是否开启搜索参数  _search=false 为关闭搜索，true为开启搜索
+		if(isset($this->request['_search'])){
+			$this->request['searchOn'] = parent::Strip($this->request['_search']);
+		}
+		//单字段排序处理
+		if(isset($this->request['sidx'])&&isset($this->request['sord'])){
+			$this->order = array($this->request['sidx']=>$this->request['sord']);
+		}
+		//单字段搜索处理
+		if(isset($this->request['searchField'])&& isset($this->request['searchString'])){
+			 $this->s = array(
+			 		$this->request['searchField']=>parent::Strip($this->request['searchString'])
+			 );
+		}
 		return true;
 	}
 	
@@ -74,17 +96,16 @@ class AdvertisingController extends PolicyController {
 		$type = isset($this->request['type'])?$this->request['type']:''; 
 		$scene = isset($this->request['scene'])?$this->request['scene']:''; 
 		$position = isset($this->request['position'])?$this->request['position']:'';
-		$order = array(
-				$this->request['sidx']=>$this->request['sord']
-		);
+		 
 	    if($table=='advert'){
 			$pager = new Page(AdvertModel::searchAdsCount($name,$type,$scene,$position,null));
 			$pager->prePage();
-			$res = AdvertModel::searchAds($name,$type,$scene,$position,$pager->start,$pager->limit,null,$order); 
+			$res = AdvertModel::searchAds($name,$type,$scene,$position,$pager->start,$pager->limit,null,$this->order); 
 		}elseif($table=='advert_pos'){
+		   
 			$pager = new Page(AdvertModel::getSearchAdsPositionCount($scene,$position));
 			$pager->prePage();
-			$res = AdvertModel::getSearchAdsPosition($scene,$position,$pager->start,$pager->limit,$order); 
+			$res = AdvertModel::getSearchAdsPosition($scene,$position,$pager->start,$pager->limit,$this->order); 
 		}
 		
 		$arr = array(
@@ -137,7 +158,7 @@ class AdvertisingController extends PolicyController {
 					$arr['name'],
 					$arr['type'],
 					$arr['url'],
-					$arr['flag']
+					0
 			);
 		}elseif($arr['table']=='advert_pos'){
 			$rec =  AdvertModel::addAdsPosition(
@@ -187,9 +208,9 @@ class AdvertisingController extends PolicyController {
 	public function actionADSale($oper,$id){
 		if(isset($id)){
 			if($oper=='offsale'){
-				return	AdvertModel::alterAds($id,"","","","stop");
+				return	AdvertModel::alterAds($id,"","","",0);
 			}elseif ($oper=='onsale'){
-				return	AdvertModel::alterAds($id,"","","","using");
+				return	AdvertModel::alterAds($id,"","","",1);
 			}
 		}
 		//没有设置id

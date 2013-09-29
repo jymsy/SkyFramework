@@ -46,6 +46,7 @@
 		<content value="1 0 * * * php /data/cloudservice/autorun/checkMedia.php" mail="qinlijiang@skyworth.com"></content>
 		<content value="0 0 * * * cd /data/cloudservice/statistics/ &amp;&amp; php stat2LogServer.php &amp;>> logstat.log" mail="shenshu@skyworth.com"></content>
 		<content value="5 0 * * * cd /data/cloudservice/statistics/ &amp;&amp; php stat_dev_area.php &amp;>> arealogstat.log" mail="shenshu@skyworth.com"></content>
+		<content value="8 0 * * * cd /data/cloudservice/statistics/ &amp;&amp; php crontab_log_mail.php &amp;>> crontablogstat.log" mail="shenshu@skyworth.com"></content>
 		<content value="* * * * * php /data/cloudservice/Framework/tvos/skyc.php reqconsum run" mail="jiangyumeng@skyworth.com"></content>
 	</server>
 </cron>

@@ -222,10 +222,15 @@ class ResUpdateModel extends \Sky\db\ActiveRecord{
 		//	     WHERE `page_index` = 0";
 		// 此处更改编码是为了满足客户端提出的用户收藏了的歌曲不在榜单了仍然能够播放。
 		 
-		return parent::createSQL("UPDATE `skyg_res`.`res_music_top`
-								     SET
-								       `category_id` = 1
-								     WHERE `page_index` = 0")->exec();
+		return parent::createSQL("UPDATE `skyg_res`.`res_music_top` AS mtop
+									SET
+									  mtop.`category_id` =(CASE WHEN mtop.`page_index`=0 THEN 0 ELSE
+									  (SELECT
+									    rca.category_id
+									  FROM
+									    `skyg_res`.`res_category` AS rca
+									  WHERE rca.category_name = mtop.resource
+									  LIMIT 1) END)")->exec();
 	}
 	
 	/**
@@ -335,5 +340,14 @@ class ResUpdateModel extends \Sky\db\ActiveRecord{
 		return parent::createSQL("truncate table `skyg_res`.`res_extra_weight`")->exec();
 			
 		
+	}
+	
+	/**
+	 * 
+	 * @return number
+	 * 删除节目表中三天前的数据
+	 */
+	public static function deleteProgamThereDaysAgo(){
+		return parent::createSQL("DELETE FROM `skyg_res`.`res_program` WHERE `created_date`<NOW() - INTERVAL 3 DAY")->exec();
 	}
 }

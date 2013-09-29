@@ -23,10 +23,24 @@ class VideoController extends PolicyController {
 	 */
 	private $s = array();
 	
+	private $plugin_root = "";
+	/*
+	 *  网站根目录,php脚本主目录
+	 */
+	private $root = "";
+	/*
+	 * 远程ftp 主目录
+	 */
+	private $rs_root = "";
+	
 	/*
 	 *  在加本类中所有方法前必加载此方法，方法最后必须以return true才生效
 	 */
 	public function beforeAction($action){
+		$this->plugin_root = "/rs/zip"; //结果 = /rs/zip		
+		$this->root = ROOT; //结果= /data/cloudservice
+		$this->rs_root = RS_ROOT; // 结果 = /data/www
+		
 		//url中所有参数加载
 		$this->request = parent::getActionParams();
 		
@@ -339,25 +353,133 @@ class VideoController extends PolicyController {
 	 * @param audited 操作审核
 	 * @param label 标注
 	 * */
-	public function actionUpdateVideoLabel($editArr){
-		$Arr = array(
-				'audited'=>$editArr['audited'],
-				'label'=>$editArr['label'],
-				'vs_id'=>$editArr['vs_id']
-		); 
-		return VideoModel::updateVideoLabel($Arr);
+	public function actionUpdateVideoLabel($audited,$label,$vs_id){
+		return VideoModel::updateVideoLabel($vs_id,$label,$audited);
 	}
 	
 	/**
 	 * 更新解析插件
 	 * */
 	 
-	public function actionUpdatePlugIn($editArr){
-		$Arr = array(
-				'version'=>date('YmdHi'),
-				'download_url'=>$editArr['download_url']
-		); 
-		return VideoModel::updatePlugIn($Arr);
+	public function actionUpdatePlugIn($download_url){
+		$version = date('YmdHi');
+		return VideoModel::updatePlugIn($version,$download_url);
+	}
+	
+	/**
+	 * 扫描当前页
+	 * */
+	 public function actionCheckCurrPage($id){
+	 	$idArr = explode(',',$id);
+	 	$urls = VideoModel::getURLById($idArr);
+	 	foreach($urls as $url){
+	 		$request = 'http://42.121.104.9/mediastatus/mediastatus.php?url=' . urlencode($url['url']);
+	 		$data = @file_get_contents($request);
+	 		if($data == '-1'){
+	 			$width =-1;
+	 			$height = -1;
+	 			$run_time = -1;
+	 		} 
+	 		elseif($data == '-2'){
+	 			$width =-2;
+	 			$height = -2;
+	 			$run_time = -2;
+	 		}
+	 		elseif(strpos($data,'duration')){
+	 			$info = $this->getMeInfo($data);
+				$width = $info['width'];
+				$height = $info['height'];
+				$duration = $info['duration'];
+				$run_time = ceil((int)$duration / 1000000);
+	 		} else {
+	 			$width =-2;
+	 			$height = -2;
+	 			$run_time = -2;
+	 		}
+	 		VideoModel::updateVideoRunTime($url['vs_id'],$run_time,$width,$height);
+	 	}
+	 }
+	 
+	/**
+     * 解析返回数据
+     * */
+    public function getMeInfo($meinfo)
+	{
+		$meinfosplit = explode(',',$meinfo);
+	    $width = $meinfosplit[0];
+	    $width = explode('=',$width);
+	    $width = trim($width[1]);
+	    $height = $meinfosplit[1];
+	    $height = explode('=',$height);
+	    $height = trim($height[1]);
+	    $duration = $meinfosplit[2];
+	    $duration = explode('=',$duration);
+	    $duration = trim($duration[1]);
+	    $result = array('width'=>$width,'height'=>$height,'duration'=>$duration);
+	    return $result;
+	}
+	 
+	 /**
+	  * 全库扫描
+	  * */
+	 public function actionCheckAll(){
+	 	$cmd = 'nohup php /data/cloudservice/autorun/checkMedia.php > /data/cloudservice/autorun/media.log 2>&1 &';
+	 	exec($cmd);
+	 }
+	
+	/**
+	 * 上传插件
+	 */
+	public function actionUploadPlugin(){
+		header('Content-Type: text/html;charset=utf-8');
+	
+		//上传
+		$_path = $this->plugin_root;
+		$localPath = $this->root.$_path.'/'; //包解压目录
+		//创建目录
+		if(!is_dir($localPath)){	
+			parent::RecursiveMkdir($localPath,0777);
+		}
+		$name = $_REQUEST['name'];
+		$obj  = UploadFile::getInstanceByName($name);
+		$zipPath = $localPath.$obj->getName();
+		$uploaded = $obj->saveAs($zipPath);		
+		
+		if($uploaded){
+	
+			//FTP上传path目录
+			$uploadList = array(					
+					$zipPath=>$this->rs_root.'/'.$_path.'/'.$obj->getName(),
+			);
+			try {
+				$ftped = parent::uploadFtp($uploadList);
+			} catch (\Exception $e) {
+				$arr =  array(
+						'msg'=>$e->getMessage(),
+						'status'=>0
+				);
+				Sky::$app->end(json_encode($arr));
+			}
+			//ftp上传
+			if($ftped)
+			{
+				//parent::delete_folder($localPath); //执行这一句报错，因为目录里文件rmdir只能删除空目录
+				//返回成功上传的url说明包页地址
+				$arr = array(
+						'msg'=>'http://'.RS_HostName.'/'.$this->plugin_root.'/'.$obj->getName(),
+						'status'=>1,
+						'md5'=>md5($zipPath)
+				);
+				Sky::$app->end(json_encode($arr));
+	
+			}
+		}
+		$arr = array(
+				'msg'=>'上传失败',
+				'status'=>0
+		);
+	
+		Sky::$app->end(json_encode($arr));
 	}
 	
 }
