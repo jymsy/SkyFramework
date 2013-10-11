@@ -135,6 +135,7 @@ class resourceUpdate {
 	function Other() {
 		ResUpdateModel::insertvidesitebyvideourl();
  		ResUpdateModel::modifymusictop();
+ 		ResUpdateModel::deleteProgamThereDaysAgo();
 // 		ResUpdateModel::modifyplaybill();
 		echo "\n resource_update Other finish!";
 	}

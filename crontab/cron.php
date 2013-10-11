@@ -41,7 +41,7 @@ function cronRun($cronPath, $eth='eth1', $errFilePath='/tmp/cron.err'){
 			// we are the child
 // 			`$cmd`;
 			$stdout = $stderr = $result = null;
-			$result=Sexec($cmd, $stdout, $stderr);
+			$result=Sexec($cmd, $stdout, $stderr, 36000);
 			$stdout=rtrim($stdout);
 			$stderr=rtrim($stderr);
 			$exec_time=time()-$now;

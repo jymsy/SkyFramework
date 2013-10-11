@@ -7,6 +7,17 @@ $config=array(
 						'urlFormat'=>'get',
 						'useParamName'=>true,
 				),
+				'mail'=>array(
+						'class'=>'Sky\utils\mail\PHPMailer',
+						'exceptions'=>true,
+						'CharSet'=>'UTF-8',
+						'Host'=>'smtp.163.com',
+						'SMTPAuth'=>true,
+						'Port'=>25,
+						'Username'=>'skysrt@163.com',
+						'Password'=>'skysrt123',
+						'enabled'=>MAIL_ENABLE
+				),
 				'ftp'=>array(
 							         'class'=>'Sky\utils\Ftp',
 							         'host'=>FTP_HOST,

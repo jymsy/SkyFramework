@@ -31,10 +31,11 @@ class DeServiceController extends Controller{
 	 * 可以通过该值优化扫描顺序，提升扫描速度。
 	 * @return integer 注册成功1或2，否则0
 	 */
-	public function actionRegister($devID, $devName, $proto, $intraIP, $token)
+	public function actionRegister($devID, $devName, $proto, $intraIP, $token, $uname, $uid)
 	{
 		$wanIp=Sky::$app->getRequest()->getUserHostAddress();
-		return DeserviceModel::insertDeservice($devID, $devName, $proto, $intraIP, $wanIp, $token);
+		return DeserviceModel::insertDeservice($devID, $devName, $proto, 
+				$intraIP, $wanIp, $token, $uid, $uname);
 	}
 	
 	/**
@@ -51,7 +52,7 @@ class DeServiceController extends Controller{
 	 * @param string $devID 设备ID。如果是电视机，则为有线网卡的mac。
 	 * @return integer 删除成功大于0，否则0
 	 */
-	public function DelDevice($devID)
+	public function actionDelDevice($devID)
 	{
 		return DeserviceModel::deleteDeserviceByDevid($devID);
 	}

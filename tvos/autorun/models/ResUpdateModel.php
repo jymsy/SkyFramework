@@ -140,7 +140,7 @@ class ResUpdateModel extends \Sky\db\ActiveRecord{
 	 * @return number       修改成功返回值大于0反之等于0
 	 */
 	public static function modifymusictopbyid($autoid){
-		return parent::createSQL("UPDATE `skyg_res`.`res_music_Top` AS mtop
+		return parent::createSQL("UPDATE `skyg_res`.`res_music_top` AS mtop
 									SET
 									  mtop.`category_id` =
 									  (SELECT
@@ -333,11 +333,12 @@ class ResUpdateModel extends \Sky\db\ActiveRecord{
 	
 	/**
 	 * 
+	 * 
 	 * @return number 
 	 * 清空附加权重表，因为每次跑AUTORUN会重新导入最新的附加权重值
 	 */
 	public static function deleteExtraWeight(){
-		return parent::createSQL("truncate table `skyg_res`.`res_extra_weight`")->exec();
+		return parent::createSQL("delete from  `skyg_res`.`res_extra_weight`")->exec();
 			
 		
 	}
@@ -345,9 +346,9 @@ class ResUpdateModel extends \Sky\db\ActiveRecord{
 	/**
 	 * 
 	 * @return number
-	 * 删除节目表中三天前的数据
+	 * 删除节目表中今天之前的数据
 	 */
 	public static function deleteProgamThereDaysAgo(){
-		return parent::createSQL("DELETE FROM `skyg_res`.`res_program` WHERE `created_date`<NOW() - INTERVAL 3 DAY")->exec();
+		return parent::createSQL("DELETE FROM `skyg_res`.`res_program` WHERE `begintime`<DATE_FORMAT((NOW() - INTERVAL 1 DAY),'%Y-%m-%d 23:59:59')")->exec();
 	}
 }

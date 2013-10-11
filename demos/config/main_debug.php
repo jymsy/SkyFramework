@@ -12,6 +12,17 @@ $config=array(
 						'useParamName'=>true,
 // 						'needCompatibility'=>true,
 				),
+				'mail'=>array(
+						'class'=>'Sky\utils\mail\PHPMailer',
+						'exceptions'=>true,
+						'CharSet'=>'UTF-8',
+						'Host'=>'smtp.163.com',
+						'SMTPAuth'=>true,
+						'Port'=>25,
+						'Username'=>'skysrt@163.com',
+						'Password'=>'skysrt123',
+						
+				),
 				'cache'=>array(
 						'class'=>'Sky\caching\MemCache',
 						'keyPrefix'=>'',

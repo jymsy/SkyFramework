@@ -121,12 +121,12 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
     					'is_enforce'=>$is_enforce,
     					'md5'=>$md5,
     					'filesize'=>$filesize,
-    					'upgrade_module_id'=>$upgrade_module_id,
     					'mac_start'=>$mac_start,
     					'mac_end'=>$mac_end,
     					'desc'=>$desc,
     					'icon'=>$icon,
-    					'bag_name'=>$bag_name
+    					'bag_name'=>$bag_name,
+    					'upgrade_module_id'=>$upgrade_module_id
     			)
     	)->exec();
     	
@@ -311,7 +311,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 					`screen_size`,
 					`thirdparty_info`,
 					`desc` ,
-					`introduce_page` 
+					`introduce_page` ,
+    			    `valid_mac`
 				FROM
 				  `skyg_base`.`base_upgrade_info`
 				ORDER BY %s 
@@ -425,7 +426,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 					`screen_size`,
 					`thirdparty_info`,
 					`desc` ,
-					`introduce_page`
+					`introduce_page`,
+    				`valid_mac`
 				FROM
 				  `skyg_base`.`base_upgrade_info`
 				WHERE upgrade_id=:id ",
@@ -462,7 +464,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 				  `screen_size` = :screen_size,
 				  `thirdparty_info` = :thirdparty_info,
 				  `desc` = :desc,
-				  `introduce_page` = :introduce_page 
+				  `introduce_page` = :introduce_page ,
+    			  `valid_mac`=:valid_mac
 				WHERE `upgrade_id` = :upgrade_id ",
     			array(
     					'core_style'=>$core_style,
@@ -478,6 +481,7 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 						'thirdparty_info'=>$thirdparty_info,
 						'desc'=>$desc, 
 						'introduce_page'=>$introduce_page,
+    					'valid_mac'=>$valid_mac,
     					'upgrade_id'=>$upgrade_id
     					)
     			)->exec();
@@ -515,7 +519,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 	    			`bag_type`,
 	    			`screen_size`,
 	    			`thirdparty_info`,
-	    			`desc`
+	    			`desc`,
+    			    `valid_mac`
     			)
     			VALUES
     			(
@@ -536,7 +541,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 	    			:bag_type,
 	    			:screen_size,
 	    			:thirdparty_info,
-	    			:desc
+	    			:desc,
+    			    :valid_mac
     			)",
     			array(
     					'core_style'=>$core_style,
@@ -556,7 +562,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 						'bag_type'=>$bag_type,
 						'screen_size'=>$screen_size,
 						'thirdparty_info'=>$thirdparty_info,
-						'desc' =>$desc
+						'desc' =>$desc,
+    					'valid_mac'=>$valid_mac
     					)
     			);
     	if($result->exec()!=0){
@@ -657,7 +664,8 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
 					`screen_size`,
 					`thirdparty_info`,
 					`desc` ,
-					`introduce_page`
+					`introduce_page`,
+    				`valid_mac`
 				FROM
 				  `skyg_base`.`base_upgrade_info`
     			%s
@@ -883,4 +891,6 @@ class UpgradeModel extends \Sky\db\ActiveRecord{
     	$result=parent::createSQL($sql)->toValue();
     	return $result;
     }
+    
+    
 }

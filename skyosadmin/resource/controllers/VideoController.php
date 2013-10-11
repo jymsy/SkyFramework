@@ -330,6 +330,16 @@ class VideoController extends PolicyController {
     * 片源扫描结果列表
     * */	
 	public function actionGetVideoForAuditList(){
+		//开启搜索列表
+		if($this->request['searchOn']=='true') {
+          return $this->SearchVideoForAudith();
+		//正常列表
+		}else{
+		  return $this->GetVideoForAuditList();
+		}
+	}
+	
+	public function GetVideoForAuditList(){
 		//计算总数
 		$pager = new Page(VideoModel::getVideoForAuditCount());
 		//处理分页
@@ -372,32 +382,41 @@ class VideoController extends PolicyController {
 	 public function actionCheckCurrPage($id){
 	 	$idArr = explode(',',$id);
 	 	$urls = VideoModel::getURLById($idArr);
-	 	foreach($urls as $url){
-	 		$request = 'http://42.121.104.9/mediastatus/mediastatus.php?url=' . urlencode($url['url']);
-	 		$data = @file_get_contents($request);
-	 		if($data == '-1'){
-	 			$width =-1;
-	 			$height = -1;
-	 			$run_time = -1;
-	 		} 
-	 		elseif($data == '-2'){
-	 			$width =-2;
-	 			$height = -2;
-	 			$run_time = -2;
+	 	try
+	 	{
+	 		foreach($urls as $url){
+		 		$request = 'http://42.121.104.9/mediastatus/mediastatus.php?url=' . urlencode($url['url']);
+		 		$data = @file_get_contents($request);
+		 		if($data == '-1'){
+		 			$width =-1;
+		 			$height = -1;
+		 			$run_time = -1;
+		 		} 
+		 		elseif($data == '-2'){
+		 			$width =-2;
+		 			$height = -2;
+		 			$run_time = -2;
+		 		}
+		 		elseif(strpos($data,'duration')){
+		 			$info = $this->getMeInfo($data);
+					$width = $info['width'];
+					$height = $info['height'];
+					$duration = $info['duration'];
+					$run_time = ceil((int)$duration / 1000000);
+		 		} else {
+		 			$width =-2;
+		 			$height = -2;
+		 			$run_time = -2;
+		 		}
+		 		VideoModel::updateVideoRunTime($url['vs_id'],$run_time,$width,$height);
 	 		}
-	 		elseif(strpos($data,'duration')){
-	 			$info = $this->getMeInfo($data);
-				$width = $info['width'];
-				$height = $info['height'];
-				$duration = $info['duration'];
-				$run_time = ceil((int)$duration / 1000000);
-	 		} else {
-	 			$width =-2;
-	 			$height = -2;
-	 			$run_time = -2;
-	 		}
-	 		VideoModel::updateVideoRunTime($url['vs_id'],$run_time,$width,$height);
+	 		return '1';
 	 	}
+	 	catch (Exception $e)
+	 	{
+	 		return $e->getMessage();
+	 	}
+	 	
 	 }
 	 
 	/**
@@ -423,8 +442,17 @@ class VideoController extends PolicyController {
 	  * 全库扫描
 	  * */
 	 public function actionCheckAll(){
-	 	$cmd = 'nohup php /data/cloudservice/autorun/checkMedia.php > /data/cloudservice/autorun/media.log 2>&1 &';
-	 	exec($cmd);
+	 	$cmd = 'nohup php /data/cloudservice/autorun/checkMedia.php &';
+	 	try
+	 	{
+	 		exec($cmd,$op);
+	 		echo $op[0];
+	 		return '1';
+	 	}
+	 	catch (Exception $e)
+	 	{
+	 		return $e->getMessage();
+	 	}
 	 }
 	
 	/**
@@ -449,7 +477,7 @@ class VideoController extends PolicyController {
 	
 			//FTP上传path目录
 			$uploadList = array(					
-					$zipPath=>$this->rs_root.'/'.$_path.'/'.$obj->getName(),
+					$zipPath=>$this->rs_root.$_path.'/'.$obj->getName(),
 			);
 			try {
 				$ftped = parent::uploadFtp($uploadList);
@@ -466,7 +494,7 @@ class VideoController extends PolicyController {
 				//parent::delete_folder($localPath); //执行这一句报错，因为目录里文件rmdir只能删除空目录
 				//返回成功上传的url说明包页地址
 				$arr = array(
-						'msg'=>'http://'.RS_HostName.'/'.$this->plugin_root.'/'.$obj->getName(),
+						'msg'=>'http://'.RS_HostName.$this->plugin_root.'/'.$obj->getName(),
 						'status'=>1,
 						'md5'=>md5($zipPath)
 				);
@@ -482,4 +510,26 @@ class VideoController extends PolicyController {
 		Sky::$app->end(json_encode($arr));
 	}
 	
+	/**
+	 * 资源审核页面搜索功能
+	 * */
+	 public function SearchVideoForAudith(){
+	 			//计算总数
+				$pager = new Page(VideoModel::searchVideoForAuditCount($this->s));
+				//处理分页
+				$pager->prePage(); 
+				
+				$res = VideoModel::searchVideoForAuditList(
+						$this->s,
+						$pager->start,
+						$pager->limit,$this->order);
+				 
+				$arr = array(
+						"records"=>$pager->count, //总条数
+						"rows"=>$this->translateSource( $res ),
+						"total"=>$pager->total_pages, //总页数
+						"page"=>$pager->page
+				);
+			return  $arr; 
+	 }
 }

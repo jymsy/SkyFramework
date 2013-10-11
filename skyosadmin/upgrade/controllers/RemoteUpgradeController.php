@@ -172,7 +172,8 @@ class RemoteUpgradeController extends PolicyController {
 				'bag_type'=>$addArr['bag_type'],
 				'screen_size'=>$addArr['screen_size'],
 				'thirdparty_info'=>$addArr['thirdparty_info'],
-				'desc' =>$addArr['desc']
+				'desc' =>$addArr['desc'],
+		  		'valid_mac'=>""
 		);
 		return UpgradeModel::insertSysUpgrade($arr);
 	}

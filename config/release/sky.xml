@@ -10,6 +10,7 @@
 	    <define name="TVOS_DB_PASSWORD" value="skytvos!123">数据库密码</define>
 	    <define name="MEMCACHE_CONFIG" value="10.132.59.105:11211">memcahce</define>
 	    <define name="MEMCACHE_ENABLE" value="true">是否启用memcache</define>
+	    <define name="MAIL_ENABLE" value="true">是否启用mail</define>
 	    <define name="FTP_HOST" value="10.200.240.21">ftp密码</define>
 		<define name="FTP_PORT" value="21">ftp端口</define>
 		<define name="FTP_USERNAME" value="srtuser">ftp用户名</define>

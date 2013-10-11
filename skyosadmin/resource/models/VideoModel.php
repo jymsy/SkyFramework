@@ -480,14 +480,14 @@ public static function model($className=__CLASS__){
 	public static function getVideoForAuditCount()
 	{
 		$sql="SELECT
-				  count(*)
+				  count(DISTINCT rvs.vs_id)
 				FROM
 				  skyg_res.`res_video_site` AS rvs
 				  JOIN skyg_res.res_video AS rv
 				    ON rv.`v_id` = rvs.`v_id`
 				  JOIN skyg_res.`res_video_url` AS rvu
 				    ON rvu.`vs_id` = rvs.`vs_id`
-				WHERE rvs.`run_time` <= 0 ";
+				WHERE rvs.`run_time` <0 ";
 		$result=parent::createSQL($sql)->toValue();
 		return $result;
 	}
@@ -524,7 +524,8 @@ public static function model($className=__CLASS__){
 				    ON rv.`v_id` = rvs.`v_id` 
 				  JOIN skyg_res.`res_video_url` AS rvu 
 				    ON rvu.`vs_id` = rvs.`vs_id` 
-				WHERE rvs.`run_time` <= 0 
+				WHERE rvs.`run_time` <0 
+				GROUP BY vs_id 
 				ORDER BY %s 
 				LIMIT %d, %d",$orderString,$start,$limit);
 		
@@ -608,7 +609,136 @@ public static function model($className=__CLASS__){
 						  `url`				           
 						FROM
 						  skyg_res.res_video_url 
-						WHERE vs_id IN (%s)",$str_id);
+						WHERE vs_id IN (%s)
+				        group by vs_id",$str_id);
+		$result=parent::createSQL($sql)->toList();
+		return $result;
+	}
+	
+	/**搜索统计解析异常的video数量
+	 *
+	* @return multitype:
+	*/
+	public static function searchVideoForAuditCount($searchCondition)
+	{
+	$searchString='';
+		foreach($searchCondition as $a=>$b){
+			if($searchString!='')			
+				$searchString.=' AND ';
+						
+			if($a=='audit')
+			{				
+				if($b==2)
+				{
+					$searchString.="`audited`=0";
+				}
+				elseif($b==1)
+				{
+					$searchString.="`audited`=1 AND `rvs`.`expired`=1";
+				}
+				elseif($b==0)
+				{
+					$searchString.="`audited`=1 AND `rvs`.`expired`=0";
+				}
+			}
+			else 
+			{
+				$searchString.=sprintf("`%s` LIKE '%s'",$a,addslashes("%".$b."%"));
+			}
+			
+			
+		}
+		if($searchString!='')
+			$searchString=' AND  '.$searchString;
+		$searchString=str_replace("vs_id", "rvs`.`vs_id", $searchString);
+		$searchString=str_replace("title", "rv`.`title", $searchString);
+		$sql=sprintf("SELECT
+				  count(DISTINCT rvs.vs_id)
+				FROM
+				  skyg_res.`res_video_site` AS rvs
+				  JOIN skyg_res.res_video AS rv
+				    ON rv.`v_id` = rvs.`v_id`
+				  JOIN skyg_res.`res_video_url` AS rvu
+				    ON rvu.`vs_id` = rvs.`vs_id`
+				WHERE rvs.`run_time` <0
+				%s",$searchString);
+		$result=parent::createSQL($sql)->toValue();
+		return $result;
+	}
+	
+	/**搜索解析异常的video列表
+	 *
+	* @param Int $start
+	* @param Int $limit
+	* @param String $orderCondition
+	* @return multitype:
+	*/
+	public static function searchVideoForAuditList($searchCondition,$start,$limit,$orderCondition=array('vs_id'=>'DESC'))
+	{
+		$orderString=PublicModel::controlArray($orderCondition);
+		$orderString=str_replace("vs_id", "rvs`.`vs_id", $orderString);
+		$orderString=str_replace("title", "rv`.`title", $orderString);
+		$orderString=str_replace("created_date", "rvs`.`created_date", $orderString);
+		
+		$searchString='';
+		foreach($searchCondition as $a=>$b){
+			if($searchString!='')			
+				$searchString.=' AND ';
+						
+			if($a=='audit')
+			{				
+				if($b==2)
+				{
+					$searchString.="`audited`=0";
+				}
+				elseif($b==1)
+				{
+					$searchString.="`audited`=1 AND `rvs`.`expired`=1";
+				}
+				elseif($b==0)
+				{
+					$searchString.="`audited`=1 AND `rvs`.`expired`=0";
+				}
+			}
+			else 
+			{
+				$searchString.=sprintf("`%s` LIKE '%s'",$a,addslashes("%".$b."%"));
+			}
+			
+			
+		}
+		
+		//$searchString=PublicModel::controlsearch($searchCondition);
+		if($searchString!='')
+			$searchString=' AND  '.$searchString;
+		$searchString=str_replace("vs_id", "rvs`.`vs_id", $searchString);
+		$searchString=str_replace("title", "rv`.`title", $searchString);
+		$searchString=str_replace("created_date", "rvs`.`created_date", $searchString);
+		$sql=sprintf("SELECT
+				  rvs.vs_id,
+				  rv.title,
+				  rvu.url,
+				  rvs.run_time,
+				  rvs.label,
+				  rvs.audited,
+				  rvs.expired,
+				  CASE
+				    WHEN rvs.audited = 0
+				    THEN 2
+				    WHEN rvs.audited = 1
+				    THEN rvs.expired
+				  END AS audit
+				FROM
+				  skyg_res.`res_video_site` AS rvs
+				  JOIN skyg_res.res_video AS rv
+				    ON rv.`v_id` = rvs.`v_id`
+				  JOIN skyg_res.`res_video_url` AS rvu
+				    ON rvu.`vs_id` = rvs.`vs_id`
+				WHERE rvs.`run_time` <0
+				 %s
+				GROUP BY vs_id
+				ORDER BY %s
+				LIMIT %d, %d",$searchString,$orderString,$start,$limit);		
 		$result=parent::createSQL($sql)->toList();
 		return $result;
 	}

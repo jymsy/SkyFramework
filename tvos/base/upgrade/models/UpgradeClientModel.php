@@ -25,8 +25,8 @@ class UpgradeClientModel extends \Sky\db\ActiveRecord{
 	 * @param Int $appVersion
 	 * @return array
 	 */
-	public static function getUpgradeVesionInfo($core_style,$core_chip,$mac,$appName,$appVersion){
-		$sql ='SELECT 
+public static function getUpgradeVesionInfo($core_style,$core_chip,$mac,$appName,$appVersion){
+    	$sql ='SELECT
 				  core_style,
 				  core_chip,
 				  init_version,
@@ -35,28 +35,29 @@ class UpgradeClientModel extends \Sky\db\ActiveRecord{
 				  `md5`,
 				  filesize,
 				  `desc`,
-				  introduce_page 
+				  introduce_page,
+    			  valid_mac
 				FROM
-				  `skyg_base`.`base_upgrade_info` 
+				  `skyg_base`.`base_upgrade_info`
 				WHERE (
-				    `init_version` = '.$appVersion.' 
+				    `init_version` = '.$appVersion.'
 				    OR `init_version` = 0
-				  ) 
-				  AND `core_style` LIKE "%'.addslashes($core_style).'%" 
-				  AND `core_chip` LIKE "%'.addslashes($core_chip).'%" 
-				  AND "'.addslashes($mac).'" BETWEEN `mac_start` 
-				  AND `mac_end` 
-				  AND `package_owner` = "'.addslashes($appName).'" 
-				  AND  `final_version`> '.$appVersion.' 
+				  )
+				  AND `core_style` LIKE "%'.addslashes($core_style).'%"
+				  AND `core_chip` LIKE "%'.addslashes($core_chip).'%"
+				  AND ("'.addslashes($mac).'" BETWEEN `mac_start`
+				  AND `mac_end` or (`valid_mac` like "%'.$mac.'%")) 
+				  AND `package_owner` = "'.addslashes($appName).'"
+				  AND  `final_version`> '.$appVersion.'
 				ORDER BY `final_version` DESC,
-				  `init_version` DESC 
-				LIMIT 1 ';		
-		$result=parent::createSQL($sql)->toList();
-		if($result!=null)
-			$result=$result[0];
-		return $result;
-		
-	}
+				  `init_version` DESC
+				LIMIT 1 ';
+    	$result=parent::createSQL($sql)->toList();
+    	if($result!=null)
+    		$result=$result[0];
+    	return $result;
+    
+    }
 	
 	
 	/**通过upgrade_id,mac地址查找符合条件模块升级包信息

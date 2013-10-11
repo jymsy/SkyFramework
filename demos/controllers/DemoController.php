@@ -74,6 +74,18 @@ class DemoController extends PolicyController{
 		
 	}
 	
+	public function actionSendMail()
+	{
+		$mail=Sky::$app->mail;
+		$mail->IsSMTP();
+		$mail->AddAddress('jiangyumeng@skyworth.com');
+		$mail->SetFrom('skysrt@163.com');
+		$mail->AddReplyTo('skysrt@163.com');
+		$mail->Subject = 'test';
+		$mail->Body = 'jym fuck';
+		$mail->Send();
+	}
+	
 	public function actionGearman(){
 		$client=Sky::$app->gearman->client();
 		$job_handle =$client->doBackground("reverse2", "this is a test");

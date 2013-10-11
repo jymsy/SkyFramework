@@ -76,9 +76,8 @@ class RecommendModel extends \Sky\db\ActiveRecord{
 				  `skyg_res`.`res_top` 
 				WHERE `recommend_type` = %d 
 				  AND `source_type` = '%s' 
-				  AND `sequence` < %d 
-				ORDER BY `sequence` DESC 
-				LIMIT 1 ",$cat_id,$source_type,$sequence);
+				  AND `sequence` =%d 
+				LIMIT 1 ",$cat_id,$source_type,$sequence+1);
 		$result = parent::createSQL($sql)->toList();
 		if($result==null){
 			return false;
@@ -100,13 +99,14 @@ class RecommendModel extends \Sky\db\ActiveRecord{
 				  `skyg_res`.`res_top` 
 				WHERE `recommend_type` = %d 
 				  AND `source_type` = '%s' 
-				  AND `sequence` > %d 
-				ORDER BY `sequence` DESC 
-				LIMIT 1 ",$cat_id,$source_type,$sequence);
+				  AND `sequence` =%d 
+				LIMIT 1 ",$cat_id,$source_type,$sequence-1);
 		$result = parent::createSQL($sql)->toList();
+		
 		if(count($result)==0){
 			return false;
 		}
+		
 		$sqlFormat ="UPDATE `skyg_res`.`res_top` SET `sequence`=%d WHERE `top_id`=%d;
 					UPDATE `skyg_res`.`res_top` SET `sequence`=%d WHERE `top_id`=%d;";
 		$sql = sprintf($sqlFormat,$sequence,$result[0]["top_id"],$result[0]["sequence"],$top_id);
@@ -131,53 +131,83 @@ class RecommendModel extends \Sky\db\ActiveRecord{
 	
 	
 	//正常列表统计
-	public static function getTopCount($cat_id){		
+	public static function getTopCount($cat_id){
+		if($cat_id!="")
+			$recommend_type=sprintf(" WHERE `recommend_type` = '%s'",$cat_id);
 		$sql=sprintf(
 				"SELECT 
-					  COUNT(*) 
+				  count(*) 
 				FROM
-					  skyg_res.`res_top` 
-				WHERE recommend_type = %d",
-				$cat_id);
+				  `skyg_res`.`res_top` AS rt 
+				JOIN  `skyg_res`.`res_video` AS rv 
+				ON rt.`source_id` = rv.v_id
+				JOIN `skyg_res`.`res_category` AS rc
+				ON rc.`category_id`=rt.`recommend_type` 
+				 %s",
+				$recommend_type);
 		$result=parent::createSQL($sql)->toValue();
 		return $result;
 		
 	}
 	// 正常列表
 	public static function getTopList($cat_id,$start,$limit,$orderCondition=array('sequence'=>'ASC')){
-		$orderString=PublicModel::controlArray($orderCondition);		
+		$orderString=PublicModel::controlArray($orderCondition);
+		$recommend_type="";	
+		if($cat_id!="")
+			$recommend_type=sprintf("AND rt.`recommend_type` = '%s'",$cat_id);		
 		$sql=sprintf(
 				"SELECT 
 				  rt.`top_id`,
 				  rt.`sequence`,
 				  rt.`recommend_type`,
+				  rc.`category_name`,
 				  rt.`source_type`,
+				  CASE
+				    rt.`source_type` 
+				    WHEN 1 
+				    THEN '影视' 
+				  END AS source_type_name,
 				  rv.`title` 
 				FROM
-				  `skyg_res`.`res_top` AS rt,
-				  `skyg_res`.`res_video` AS rv 
-				WHERE rt.`source_id` = rv.v_id 
-				  AND rt.`recommend_type` = '%s' 
-				ORDER BY %s 
-				LIMIT $start, $limit",$cat_id,$orderString,$start,$limit);																								
+				  `skyg_res`.`res_top` AS rt 
+				JOIN  `skyg_res`.`res_video` AS rv 
+				ON rt.`source_id` = rv.v_id
+				JOIN `skyg_res`.`res_category` AS rc
+				ON rc.`category_id`=rt.`recommend_type` 
+				%s
+				 ORDER BY %s 
+				LIMIT $start, $limit",$recommend_type,$orderString,$start,$limit);																								
 		$result=parent::createSQL($sql)->toList();
 		return $result;		
 		
 	}      
 	
 	//搜索列表统计 ()
-	public static function searchTopCount($cat_id,$searchCondition) {
+	public static function searchTopCount($cat_id,$searchCondition) {		
+		$recommend_type="";
+		if($cat_id!="")
+			$recommend_type=sprintf("WHERE `recommend_type` = '%s'",$cat_id);
 		$searchString=PublicModel::controlsearch($searchCondition);
 		if($searchString!='')
-			$searchString=' AND  '.$searchString;
+		{
+			if($recommend_type!="")
+				$searchString=' AND  '.$searchString;
+			else 
+				$searchString=' WHERE  '.$searchString;
+		}
+		$searchString=str_replace("category_name", "rc`.`category_name", $searchString);
 		$sql=sprintf(
 				"SELECT 
-					  COUNT(*) 
+				  count(*) 
 				FROM
-					  skyg_res.`res_top` 
-				WHERE recommend_type = %d
+				  `skyg_res`.`res_top` AS rt 
+				JOIN  `skyg_res`.`res_video` AS rv 
+				ON rt.`source_id` = rv.v_id
+				JOIN `skyg_res`.`res_category` AS rc
+				ON rc.`category_id`=rt.`recommend_type`
+				 %s
 				 %s",
-				$cat_id,$searchString);
+				$recommend_type,$searchString);
 		$result=parent::createSQL($sql)->toValue();
 		return $result;
 		
@@ -187,25 +217,139 @@ class RecommendModel extends \Sky\db\ActiveRecord{
 		$searchString=PublicModel::controlsearch($searchCondition);
 		if($searchString!='')
 			$searchString=' AND  '.$searchString;
-		$orderString=PublicModel::controlArray($orderCondition);	
+		$orderString=PublicModel::controlArray($orderCondition);
+		$recommend_type="";
+		if($cat_id!="")
+			$recommend_type=sprintf("AND rt.`recommend_type` = '%s'",$cat_id);
+		$searchString=str_replace("category_name", "rc`.`category_name", $searchString);
 		$sql=sprintf(
 				"SELECT 
 				  rt.`top_id`,
 				  rt.`sequence`,
 				  rt.`recommend_type`,
+				  rc.`category_name`,
 				  rt.`source_type`,
+				  CASE
+				    rt.`source_type` 
+				    WHEN 1 
+				    THEN '影视' 
+				  END AS source_type_name,
+				  CASE
+				    rt.`source_type` 
+				    WHEN 1 
+				    THEN '影视' 
+				  END AS source_type,
 				  rv.`title` 
 				FROM
-				  `skyg_res`.`res_top` AS rt,
-				  `skyg_res`.`res_video` AS rv 
-				WHERE rt.`source_id` = rv.v_id 
-				  AND rt.`recommend_type` = '%s' 
-				%s
+				  `skyg_res`.`res_top` AS rt 
+				JOIN  `skyg_res`.`res_video` AS rv 
+				ON rt.`source_id` = rv.v_id
+				JOIN `skyg_res`.`res_category` AS rc
+				ON rc.`category_id`=rt.`recommend_type` 
+				 %s 
+				 %s
 				ORDER BY %s 
-				LIMIT $start, $limit",$cat_id,$searchString,$orderString,$start,$limit);	
+				LIMIT $start, $limit",$recommend_type,$searchString,$orderString,$start,$limit);	
 		$result=parent::createSQL($sql)->toList();
 		return $result;		
 	} 
+	
+	//未推荐的影视列表
+	public static function getUnrecommendVideoList($start,$limit,$orderCondition=array('v_id'=>'DESC')){
+		$orderString=PublicModel::controlArray($orderCondition);
+		$sql=sprintf(
+				"SELECT
+				  rv.`v_id`,
+				  rv.`title`,
+				  rv.`actor`,
+				  rv.`category`,
+				  rv.`category_name`,
+				  rv.`classfication`,
+				  rv.`total_segment`,
+				  BIT_AND(rvs.expired) AS expired,
+				  GROUP_CONCAT(rvs.`source`) AS `source`
+				FROM
+				  `skyg_res`.`res_video` AS rv
+				JOIN `skyg_res`.`res_video_site` AS rvs
+				    ON rv.`v_id` = rvs.`v_id`
+				WHERE rv.`v_id` NOT IN (SELECT source_id FROM skyg_res.res_top)
+				GROUP BY rv.`v_id`
+				ORDER BY %s
+				LIMIT %d,%d",$orderString,$start,$limit);
+		$result=parent::createSQL($sql)->toList();
+		return $result;
+	
+	}
+	
+	//未推荐的影视列表统计
+	public static function getUnrecommendVideoCount(){
+		$sql="SELECT 
+				  count(DISTINCT rv.`v_id`) 
+				FROM
+				  `skyg_res`.`res_video` AS rv 
+				JOIN `skyg_res`.`res_video_site` AS rvs 
+				    ON rv.`v_id` = rvs.`v_id` 
+				WHERE rv.`v_id` NOT IN (SELECT source_id FROM skyg_res.res_top)";
+		$result=parent::createSQL($sql)->toValue();
+		return $result;		
+		
+	} 
+
+	//搜索未推荐的影视列表
+	public static function searchUnrecommendVideoList($searchCondition,$start,$limit,$orderCondition=array('v_id'=>'DESC')){
+		$orderString=PublicModel::controlArray($orderCondition);
+		$searchString=PublicModel::controlsearch($searchCondition);
+		if($searchString!='')
+			$searchString=' and  '.$searchString;
+		$searchString=str_replace("v_id", "rv`.`v_id", $searchString);
+		$searchString=str_replace("title", "rv`.`title", $searchString);
+		$sql=sprintf(
+				"SELECT
+				  rv.`v_id`,
+				  rv.`title`,
+				  rv.`actor`,
+				  rv.`category`,
+				  rv.`category_name`,
+				  rv.`classfication`,
+				  rv.`total_segment`,
+				  BIT_AND(rvs.expired) AS expired,
+				  GROUP_CONCAT(rvs.`source`) AS `source`
+				FROM
+				  `skyg_res`.`res_video` AS rv
+				JOIN `skyg_res`.`res_video_site` AS rvs
+				    ON rv.`v_id` = rvs.`v_id`
+				WHERE rv.`v_id` NOT IN (SELECT source_id FROM skyg_res.res_top)
+				 %s
+				GROUP BY rv.`v_id`
+				ORDER BY %s
+				LIMIT %d,%d",$searchString,$orderString,$start,$limit);
+		$result=parent::createSQL($sql)->toList();
+		return $result;
+	
+	}
+	
+	//搜索未推荐的影视列表统计
+	public static function searchUnrecommendVideoCount($searchCondition){
+		$searchString=PublicModel::controlsearch($searchCondition);
+		if($searchString!='')
+			$searchString=' and  '.$searchString;
+		$searchString=str_replace("v_id", "rv`.`v_id", $searchString);
+		$searchString=str_replace("title", "rv`.`title", $searchString);
+		$sql=sprintf("SELECT
+				  count(DISTINCT rv.`v_id`)
+				FROM
+				  `skyg_res`.`res_video` AS rv
+				JOIN `skyg_res`.`res_video_site` AS rvs
+				    ON rv.`v_id` = rvs.`v_id`
+				WHERE rv.`v_id` NOT IN (SELECT source_id FROM skyg_res.res_top)
+				 %s",$searchString);
+		$result=parent::createSQL($sql)->toValue();
+		return $result;
+	
+	}
+	
+	
+	
 	
 		
 }

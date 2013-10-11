@@ -16,6 +16,7 @@ use sns\models\SnsPlaySourceModel;
 use res\models\ResourceQueryForSnsModel;
 use base\components\SkySession;
 use base\models\UnlawfulWordsModel;
+use Sky\utils\VarDump;
 
 defined('SHOW_TYPE_DEFAULT') or define('SHOW_TYPE_DEFAULT', 1);
 defined('SHOW_TYPE_WATCHING_NOW') or define('SHOW_TYPE_WATCHING_NOW', "");
@@ -156,11 +157,11 @@ class SnsActionController extends ResController {
 	 */
 	private function getPlayCount($nameArray, $startTime='', $endTime=''){
 
-		$url = REPORT_SERVICE_URI."?func=ResourceCount&params=media:shenzhen:$startTime:$endTime:";
+		$url = urlencode(REPORT_SERVICE_URI).urlencode("?func=ResourceCount&params=media:shenzhen:$startTime:$endTime:");
 
 		$name = join("-", $nameArray);
 		$url = $url.urlencode($name);
-		$callBackStr = self::curl_fetch($url);
+		$callBackStr = self::curl_fetch(urldecode($url));
 		$callBackArray = json_decode($callBackStr);
 
 		return $callBackArray;
@@ -231,9 +232,8 @@ class SnsActionController extends ResController {
 		$videoType = '0001';
 		$startTime = time() - 86400*60;
 		$endTime = time();
-		$url = REPORT_SERVICE_URI."?func=ResourceOnDemandStat&params=media:$startTime:$endTime:shenzhen:$total";
-
-		$returnData = self::curl_fetch($url);
+		$url = urlencode(REPORT_SERVICE_URI).urlencode("?func=ResourceOnDemandStat&params=media:$startTime:$endTime:shenzhen:$total");
+		$returnData = self::curl_fetch(urldecode($url));
 		$returnData = json_decode($returnData);
 		$snsArray = array();
 		$queryVideoNames = array();

@@ -24,7 +24,7 @@ class DeServiceTest extends \Sky\test\TestCase {
 	
 	public function testRegister()
 	{
-		$ret=self::$desController->actionRegister("001a001a001a" ,"55E800A-001a001a001a","http","192.168.1.101","wifi:SRT");
+		$ret=self::$desController->actionRegister("001a001a001a" ,"55E800A-001a001a001a","http","192.168.1.101","wifi:SRT","jym",12345);
 // 		var_dump($ret);
 		$this->assertEquals($ret, 1);
 	}

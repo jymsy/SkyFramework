@@ -227,7 +227,7 @@ class UserModel extends \Sky\db\ActiveRecord{
 	  * @return array userIds
 	  * 
 	  */
-	public static function getUserIdByNickName($userNickName,$del_flag=1){
+	public static function getUserIdByNickName($userNickName,$start=0,$limit=50,$del_flag=1){
 		$con='';
 		if($del_flag==1)
 			$con="AND `is_deleted`=0";
@@ -238,7 +238,8 @@ class UserModel extends \Sky\db\ActiveRecord{
 				  `user_icon` AS userIcon 
 				FROM
 				  `skyg_base`.`base_user` 
-				WHERE `user_nickname` like '%%s%' %s",$userNickName,$con);
+				WHERE `user_nickname` like '%%%s%%' %s
+				LIMIT %d,%d",$userNickName,$con,$start,$limit);
 		$result=parent::createSQL($sql)->toList();
 		return $result;
 	}
@@ -265,5 +266,21 @@ class UserModel extends \Sky\db\ActiveRecord{
 		return $result;
 	}
 	
+	/**注销 admin 账户
+	 *
+	* @param INT user_id
+	* @return Int 0-更新失败，1-更新成功
+	*
+	*/
+	public static function updateAdminType($user_id){		
+		$sql=sprintf("UPDATE 
+					  `skyg_base`.`base_user` 
+					SET
+					  is_admin = 2 
+					WHERE user_id = %d ",$user_id
+		);
+		$result=parent::createSQL($sql)->exec();
+		return $result;
+	}
 	
 }

@@ -34,7 +34,9 @@ class DeserviceModel extends \Sky\db\ActiveRecord{
 				                         `protocols`,
 				                         `intranetip`,
 				                         `wanip`,
-				                         `intranettoken`
+				                         `intranettoken`,
+				                         `user_id`,
+				                         `user_name`
 				                    from `skyg_res`.`res_deservice`
 				                   where `wanip`=:v_ip",
 				                 array( "v_ip"=>$v_ip
@@ -51,26 +53,32 @@ class DeserviceModel extends \Sky\db\ActiveRecord{
      * @property  string       $v_intranettoken  内网信息标识   
 	 * @return number
 	 */
-	public static function insertDeservice($v_devid,$v_devname,$v_protocols,$v_intranetip,$v_wanip,$v_intranettoken){
+	public static function insertDeservice($v_devid,$v_devname,$v_protocols,$v_intranetip,$v_wanip,$v_intranettoken,$v_userid,$v_username){
 		
 		return parent::createSQL("replace into `skyg_res`.`res_deservice`(`devid`,
 				                                                         `devname`,
 				                                                         `protocols`,
 				                                                         `intranetip`,
 				                                                         `wanip`,
-				                                                         `intranettoken`)
+				                                                         `intranettoken`,
+				                                                         `user_id`,
+				                                                         `user_name`)
 				                                                   values(:v_devid,
 				                                                          :v_devname,
 				                                                          :v_protocols,
 				                                                          :v_intranetip,
 				                                                          :v_wanip,
-				                                                          :v_intranettoken)",
+				                                                          :v_intranettoken,
+				                                                          :v_userid,
+				                                                          :v_username)",
 				                                                  array("v_devid"=>$v_devid,
 				                                                  		"v_devname"=>$v_devname,
 				                                                  		"v_protocols"=>$v_protocols,
 				                                                  		"v_intranetip"=>$v_intranetip,
 				                                                  		"v_wanip"=>$v_wanip,
-				                                                  		"v_intranettoken"=>$v_intranettoken
+				                                                  		"v_intranettoken"=>$v_intranettoken,
+				                                                  		"v_userid"=>(int)$v_userid,
+				                                                  		"v_username"=>$v_username
 				                                                  		))->exec();
 	}
 	

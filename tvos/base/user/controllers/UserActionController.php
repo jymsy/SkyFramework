@@ -283,6 +283,7 @@ class UserActionController extends Controller {
 
 		$result = 0;
 		if(strlen($mac) > 1 && strlen($userId) > 1){
+			UserModel::updateAdminType($userId);
 			$result = BaseDevice::delDevUserMap($mac,$userId);
 		}
 
