@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<config>
-	<common>
-		<define name="INFO_URL_PREFIX" value="http://'.HostName.'/resource/info.php?id=">资讯</define>
-		<define name="ROOT" value="/data/cloudservice">php脚本主目录，网站根目录</define>
-		<define name="REQ_LOG_DIR" value="/tmp/request_log/">web接口访问耗时日志目录</define>
-		<define name="PROF_PROBABILITY" value="100">接口执行时间采样率</define>
-	</common>
-</config>
