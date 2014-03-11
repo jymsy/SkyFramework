@@ -88,7 +88,7 @@ class WebApplication extends Application{
 			$controller->init();
 			return $controller->run($actionID);
 		}else
-			throw new \Sky\base\HttpException(404,'unable to reslve route');
+			throw new \Sky\base\HttpException(404,'unable to reslove route');
 	}
 	
 	/**

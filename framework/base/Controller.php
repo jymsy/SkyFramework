@@ -259,7 +259,7 @@ class Controller extends BaseController{
 			}else
 				return $controller[0]->$actionName();
 		}else{
-			throw new \Sky\base\HttpException(404,'unable to reslve route');
+			throw new \Sky\base\HttpException(404,'unable to reslove route');
 		}
 	}
 	

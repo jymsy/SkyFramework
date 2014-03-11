@@ -70,6 +70,22 @@ class WebModule extends \Sky\base\Module{
 			return $this->_layoutPath=$this->getViewPath().DIRECTORY_SEPARATOR.'layouts';
 	}
 	
+	/**
+	 * 该方法在属于该模块的所有的controller的acton调用之前被调用
+	 * 你可以用下面的方式重写该方法：
+	 * <pre>
+	 * if(parent::beforeControllerAction($controller,$action))
+	 * {
+	 *     // 你的代码
+	 *     return true;
+	 * }
+	 * else
+	 *     return false;
+	 * </pre>
+	 * @param Controller $controller controller
+	 * @param Action $action action
+	 * @return boolean acton是否应该被执行。
+	 */
 	public function beforeControllerAction($controller,$action)
 	{
 		if(($parent=$this->getParentModule())===null)

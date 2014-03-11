@@ -42,7 +42,7 @@ class Curl extends \Sky\base\Component {
         if (!curl_errno($this->_ch))
             return $c;
         else
-            throw new \Exception(curl_error($this->_ch));
+            throw new \Exception(curl_error($this->_ch)."@$url");
     }
     
     public function getRequestInfo($info){
