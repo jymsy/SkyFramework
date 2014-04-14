@@ -1,0 +1,2 @@
+<?php
+namespace demos\tests;
